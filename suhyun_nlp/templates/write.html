@@ -1,0 +1,160 @@
+{% extends 'header.html' %}
+{% block write %}
+  <style>
+    body {
+      background: #f8f9fc;
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 0;
+      color: #333;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .write-wrapper {
+      width: 100%;
+      max-width: 900px;
+      padding: 20px;
+    }
+
+    .write-container {
+      background: #ffffff;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.06);
+      width: 100%;
+    }
+
+    h1 {
+      font-size: 34px;
+      font-weight: 700;
+      margin-bottom: 0;
+      color: #212529;
+    }
+
+    h2 {
+      font-size: 18px;
+      color: #6c757d;
+      margin-bottom: 25px;
+    }
+
+    .form-group {
+      margin-bottom: 24px;
+    }
+
+    label {
+      font-weight: 500;
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    input[type="text"], textarea {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #ced4da;
+      border-radius: 12px;
+      font-size: 14px;
+      background: #fdfdfd;
+      transition: border-color 0.3s;
+    }
+
+    input[type="text"]:focus, textarea:focus {
+      border-color: #888;
+      outline: none;
+      background: #fff;
+    }
+
+    textarea {
+      resize: none;
+      height: 120px;
+    }
+
+    .checkbox-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .checkbox-grid input[type="checkbox"] {
+      display: none;
+    }
+
+    .checkbox-grid label {
+      padding: 10px 16px;
+      border: 1px solid #ddd;
+      border-radius: 20px;
+      font-size: 13px;
+      background: #f1f3f5;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .checkbox-grid input[type="checkbox"]:checked + label {
+      background-color: #3c3f58;
+      color: white;
+      border-color: #3c3f58;
+    }
+
+    button[type="submit"] {
+      background: #3c3f58;
+      color: #fff;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      transition: background 0.3s;
+      width: 100%;
+    }
+
+    button[type="submit"]:hover {
+      background: #2c2e44;
+    }
+  </style>
+
+  <div class="write-wrapper">
+    <div class="write-container">
+      <form action="{% url 'to-write' %}" method="POST">
+        {% csrf_token %}
+        <h1>WeWrite</h1>
+        <h2>Start a new story project</h2>
+
+        <div class="form-group">
+          <label>Genre</label>
+          <div class="checkbox-grid">
+            {% for genre_name in genre_name_list %}
+                <input type="checkbox" name="selected_genre[]" value="{{ genre_name }}" id="genre_{{ forloop.counter }}">
+                <label for="genre_{{ forloop.counter }}">{{ genre_name }}</label>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="title">Title</label>
+          <input type="text" id="title" name="title" placeholder="Enter a captivating title">
+        </div>
+
+        <div class="form-group">
+          <label for="main-character">Main Character</label>
+          <input type="text" id="main-character" name="maincharacter" placeholder="e.g. Luna, the curious explorer">
+        </div>
+
+        <div class="form-group">
+          <label for="time-setting">Time Setting</label>
+          <input type="text" id="time-setting" name="timesetting" placeholder="e.g. Year 3024, Ancient Korea">
+        </div>
+
+        <div class="form-group">
+          <label for="exposition">Exposition</label>
+          <textarea id="exposition" name="exposition" placeholder="Write the opening of your story here..."></textarea>
+        </div>
+
+        <button type="submit">Submit Your Story</button>
+      </form>
+    </div>
+  </div>
+{% endblock %}
