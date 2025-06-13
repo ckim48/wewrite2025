@@ -1,6 +1,11 @@
 {% extends 'header.html' %}
 {% block board %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
     <title>WeWrite - User Posts</title>
+    <script src="https://unpkg.com/isotope-layout@3/dist/isotope.pkgd.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -15,67 +20,101 @@
             align-items: center;
             margin-bottom: 50px;
             margin-top: 70px;
+            flex-wrap: wrap;
         }
-        .filter-select {
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-        .button {
+
+.button-group .button {
+    padding: 10px 18px;
+    margin: 5px 8px 5px 0;
+    background: linear-gradient(145deg, #f0f0f0, #dcdcdc);
+    color: #333;
+    font-weight: 600;
+    border: 1px solid #ccc;
+    border-radius: 25px;
+    cursor: pointer;
+    box-shadow: 2px 2px 6px #bbb, -2px -2px 6px #fff;
+    transition: all 0.3s ease;
+}
+
+.button-group .button:hover {
+    background: #b0b0b0;
+    color: #fff;
+    box-shadow: 2px 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.button-group .button.active {
+    background: #555;
+    color: white;
+    border-color: #444;
+    box-shadow: 2px 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+
+        .button, .fakebutton {
             padding: 10px 15px;
-            background-color: #007bff;
-            color: white;
-            text-decoration: none;
+            background-color: #d2d2d2;
+            color: black;
             border: none;
             border-radius: 5px;
             font-size: 14px;
             cursor: pointer;
+            text-decoration: none;
         }
+
         .button:hover {
+            color: white;
+            background-color:#bcbcbc;
+        }
+
+        .fakebutton {
+            background-color: #cccccc;
+            cursor: default;
+        }
+
+        .button.active {
             background-color: #0056b3;
         }
-        .fakebutton {
-            padding: 10px 15px;
-            background-color: #cccccc;
-            color: white;
-            text-decoration: none;
-            border: none;
-            border-radius: 5px;
-            font-size: 14px;
-            cursor: pointer;
-        }
+
         .post-card {
             background: white;
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             padding: 20px;
-            margin-bottom: 15px;
+            margin-bottom: 30px;
             position: relative;
+            width: 100%;
         }
+
         .post-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 10px;
         }
+
         .post-title-container {
             display: flex;
             align-items: center;
         }
+
         .post-title {
             font-weight: bold;
             font-size: 18px;
-            margin-right: 10px; /* Space between title and date */
+            color: #4b4b4b;
+            margin-right: 10px;
         }
+
         .post-date {
             font-size: 14px;
             color: #888;
         }
+
         .post-content {
             font-size: 14px;
             color: #555;
             margin-bottom: 10px;
         }
+
         .category {
             font-size: 14px;
             font-weight: bold;
@@ -87,70 +126,93 @@
             right: 20px;
             transform: translateY(-50%);
         }
+
         .genre {
             position: absolute;
             top: -10px;
             right: 20px;
             background-color: white;
-            color: white;
             font-size: 12px;
             font-weight: bold;
             padding: 5px 10px;
-            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2), 0 4px 6px rgba(0, 0, 0, 0.1);
-
             border-radius: 5px;
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2), 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        .rising-action { color: darkgray; }
-        .resolution { color: darkgray; }
-        .climax { color: darkgray; }
+
+        .rising-action, .resolution, .climax {
+            color: darkgray;
+        }
+
         .science-fiction { background-color: white; color: #4caf50; }
         .fantasy { background-color: white; color: #673ab7; }
         .fiction { background-color: white; color: #ff9800; }
     </style>
 </head>
 <body>
+
     <div class="top-bar">
-        <select class="filter-select">
-            <option value="all">All</option>
-            <option value="science-fiction">Science Fiction</option>
-            <option value="fantasy">Fantasy</option>
-            <option value="fiction">Fiction</option>
-        </select>
-        {% if new_story_available == True %}
+        <div id="filters" class="button-group">
+            <button class="button active" data-filter="*">All</button>
+            <button class="button" data-filter=".science-fiction">Science Fiction</button>
+            <button class="button" data-filter=".fantasy">Fantasy</button>
+            <button class="button" data-filter=".fiction">Fiction</button>
+        </div>
+
+        {% if new_story_available %}
             <a class="button" href="{% url 'to-write' %}">Start New Story</a>
-        {% endif %}
-        {% if new_story_available == False %}
+        {% else %}
             <a class="fakebutton">Start New Story</a>
         {% endif %}
     </div>
 
-    {% for story, exposition, pk, genre, title, last_part in story_tuple_list %}
-    <a href="{% url 'to-collaborate' pk %}" style="text-decoration:none;">
-        <div class="post-card">
-            {% if genre.name == 'fiction' %}
-            <span class="genre fiction">{{ genre.name }}</span>
-            {% endif %}
-            {% if genre.name == 'science fiction' %}
-            <span class="genre science-fiction">{{ genre.name }}</span>
-            {% endif %}
-            {% if genre.name == 'fantasy' %}
-            <span class="genre fantasy">{{ genre.name }}</span>
-            {% endif %}
-            <div class="post-header">
-                <div class="post-title-container">
-                    <span class="post-title">{{ title }}</span>
-                    <span class="post-date">{{ story.started_date }}</span>
+    <div id="story-grid">
+        {% for story, exposition, pk, genre, title, last_part in story_tuple_list %}
+        <a href="{% url 'to-collaborate' pk %}" style="text-decoration:none;">
+            <div class="post-card {{ genre.name|slugify }}">
+                {% if genre.name == 'fiction' %}
+                    <span class="genre fiction">{{ genre.name | title }}</span>
+                {% elif genre.name == 'science fiction' %}
+                    <span class="genre science-fiction">{{ genre.name | title}}</span>
+                {% elif genre.name == 'fantasy' %}
+                    <span class="genre fantasy">{{ genre.name | title}}</span>
+                {% else %}
+                    <span class="genre">{{ genre.name | title}}</span>
+                {% endif %}
+                <div class="post-header">
+                    <div class="post-title-container">
+                        <span class="post-title">{{ title | title}}</span>
+                        <span class="post-date">{{ story.started_date }}</span>
+                    </div>
                 </div>
+                <div class="post-content">
+                    {{ exposition | title}}
+                </div>
+                <span class="category">{{ last_part | title}}</span>
             </div>
-            <div class="post-content">
-                {{ exposition }}
-            </div>
-            <span class="category rising-action">{{ last_part }}</span>
-        </div>
-    </a>
-    {% endfor %}
+        </a>
+        {% endfor %}
+    </div>
 
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const iso = new Isotope("#story-grid", {
+            itemSelector: ".post-card",
+            layoutMode: "masonry"
+        });
 
+        const filterButtons = document.querySelectorAll("#filters .button");
+        filterButtons.forEach((btn) => {
+            btn.addEventListener("click", function () {
+                const filterValue = this.getAttribute("data-filter");
+                iso.arrange({ filter: filterValue });
+
+                // Toggle active class
+                filterButtons.forEach(b => b.classList.remove("active"));
+                this.classList.add("active");
+            });
+        });
+    });
+    </script>
 </body>
-{% endblock %}
 </html>
+{% endblock %}

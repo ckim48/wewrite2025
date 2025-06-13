@@ -14,8 +14,8 @@ from member.models import *  # Importing CustomUser model from manager app
 
 def to_index(request):
     # Redirect to counselor-main page if user is already authenticated
-    if request.user.is_authenticated:
-        return redirect('to-main')
+    # if request.user.is_authenticated:
+    #     return redirect('to-main')
 
     return render(request, 'index.html', {})
 
@@ -199,7 +199,7 @@ def to_main(request):
     isAdmin = curr_user.is_staff
 
     author_stages = Stage.objects.filter(user=curr_user, status=3)
-    if len(author_stages)>=5:
+    if len(author_stages)>=0:
         new_story_available = True
     else:
         new_story_available = False
@@ -247,26 +247,32 @@ def to_main(request):
         'new_story_available': new_story_available,
     }
     return render(request, 'main.html', context)
-
 @login_required
 def to_read(request):
+    from pathlib import Path
+    import os, pickle
+    from numpy import dot
+    from numpy.linalg import norm
+
     curr_user = request.user
     isAdmin = curr_user.is_staff
     username = curr_user.username
 
-    all_storys = Story.objects.filter(status=2).order_by('started_date')
-    print(all_storys)
+    all_stories = Story.objects.all().order_by('started_date')  # ✅ show all stories regardless of status
+    story_list = list(all_stories)
 
-    story_list = list(all_storys)
-    story_author_list = []
     all_stages = list(Stage.objects.all().order_by('pk'))
+
+    # Get authors for each story
+    story_author_list = []
     for story in story_list:
         curr_story_author_list = []
         for stage in all_stages:
             if stage.story == story:
-                curr_story_author_list.append(stage.user.name)
-                #curr_story_author_list.append(stage.user.username)
+                author_display_name = stage.user.name or stage.user.username
+                curr_story_author_list.append(author_display_name)
         story_author_list.append(", ".join(curr_story_author_list))
+
     story_pk_list = [story.pk for story in story_list]
     story_genre_list = [story.genre for story in story_list]
     story_title_list = [story.title for story in story_list]
@@ -275,33 +281,13 @@ def to_read(request):
     for i in range(len(story_list)):
         story_tuple_list.append((story_list[i], story_author_list[i], story_pk_list[i], story_genre_list[i], story_title_list[i]))
 
-
-
-
-    '''
-    장르의 종류가 [장르1, 장르2, 장르3, 장르4, ...] 가 있다고 할 때,
-    각 유저마다 아래와 같은 vector를 만들어 보자.
-    [장르1본횟수, 장르2본횟수, 장르3본횟수, 장르4본횟수, ...]
-    
-    각 글을 다음과 같은 vector로 표현해 보자.
-    자신의 장르에 해당하는 번째만 1이고, 나머지는 0인 vector.
-    [0, 0, 0, 1, 0, 0, 0, ...]
-    
-    그 다음, 각 유저의 vector와 모든 글마다의 vector 간 similarity를 측정해서,
-    가장 similarity가 높은 순으로 정렬하여 4개만 보여주는 것임!!!!
-    '''
-    from pathlib import Path
-    # Build paths inside the project like this: BASE_DIR / 'subdir'.
+    # --- Recommendation logic ---
     BASE_DIR = Path(__file__).resolve().parent.parent
+    picklefile_name = os.path.join(BASE_DIR, 'static', 'pickle', f'{curr_user.pk}.pickle')
 
-    import pickle
-    import os
-    username = curr_user.username
-    picklefile_name = os.path.join(BASE_DIR, 'static') + "/pickle/" + str(curr_user.pk) + '.pickle'
     if os.path.isfile(picklefile_name):
-        with open(file=picklefile_name, mode='rb') as f:
+        with open(picklefile_name, 'rb') as f:
             user_history_dict = pickle.load(f)
-
     else:
         user_history_dict = {
             'genre_pk_list': [],
@@ -310,89 +296,51 @@ def to_read(request):
 
     all_genres = Genre.objects.all().order_by('pk')
     all_genres_pk_list = [genre.pk for genre in all_genres]
-    genre_vector_list = [
-        # 아래처럼 되는 게 목표임!!
-        # [1, 0, 0]
-        # [0, 1, 0]
-        # [0, 0, 1]
-    ]
 
-    # ['fantasy', 'romance', 'historical']
+    genre_vector_list = []
+    for idx in range(len(all_genres)):
+        vector = [0] * len(all_genres)
+        vector[idx] = 1
+        genre_vector_list.append(vector)
 
-    for idx, genre in enumerate(all_genres):
-        curr_vector = [0]*len(all_genres)
-        curr_vector[idx] += 1
-        genre_vector_list.append(curr_vector)
+    user_vector = [0] * len(all_genres)
+    for idx, gpk in enumerate(user_history_dict['genre_pk_list']):
+        if gpk in all_genres_pk_list:
+            genre_idx = all_genres_pk_list.index(gpk)
+            user_vector[genre_idx] += user_history_dict['genre_cnt_list'][idx]
 
-    user_vector = [0]*len(all_genres)
-    # 이 시점에서 user_vector는 전체 장르 갯수와 완전히 같은 길이를 갖게 됨
-    user_genre_pk_list = user_history_dict['genre_pk_list']
-    user_genre_cnt_list = user_history_dict['genre_cnt_list']
-    for idx, ugp in enumerate(user_genre_pk_list):
-        user_vector[all_genres_pk_list.index(ugp)] += user_genre_cnt_list[idx]
-    # 이 시점에서 user_vector는 user가 읽었던 횟수를 완전히 갖고 있게 됨
-
-    all_storys = Story.objects.all().order_by('pk')
-    all_story_genre_pk_list = [story.genre.pk for story in all_storys]
-    all_story_vector_list = [
-        # 아래처럼 되는 게 목표임!!
-        # [1, 0, 0] 첫번째 스토리가 판타지
-        # [1, 0, 0] 두번째 스토리도 판타지
-        # [0, 0, 1] 세번째 스토리가 히스토리컬
-        # [0, 1, 0] 네번째 스토리가 로맨스
-    ]
-    for asgp in all_story_genre_pk_list:
-        all_story_vector_list.append(genre_vector_list[all_genres_pk_list.index(asgp)])
-
-    from numpy import dot
-    from numpy.linalg import norm
+    all_story_vector_list = []
+    all_story_genre_pk_list = [story.genre.pk for story in all_stories]
+    for pk in all_story_genre_pk_list:
+        idx = all_genres_pk_list.index(pk)
+        all_story_vector_list.append(genre_vector_list[idx])
 
     def cosine_similarity(vec1, vec2):
-        return dot(vec1, vec2) / (norm(vec1) * norm(vec2))
+        return dot(vec1, vec2) / (norm(vec1) * norm(vec2)) if norm(vec1) > 0 and norm(vec2) > 0 else 0.0
 
-    all_story_similarity_list = []
-    for asv in all_story_vector_list:
-        all_story_similarity_list.append(cosine_similarity(user_vector, asv))
-
-    # tuple 이란 걸 표현할 때 ("수현", 18, "NLCS")
-    all_story_tuple_list = []
-    for i in range(len(all_storys)):
-        all_story_tuple_list.append((all_storys[i], all_story_similarity_list[i]))
-
+    all_story_similarity_list = [cosine_similarity(user_vector, sv) for sv in all_story_vector_list]
+    all_story_tuple_list = list(zip(all_stories, all_story_similarity_list))
     sorted_data = sorted(all_story_tuple_list, key=lambda x: x[1], reverse=True)
-
-    recommended_story_list = [sd[0] for sd in sorted_data[:4]]
-
-    print(recommended_story_list)
+    recommended_story_list = [s[0] for s in sorted_data[:4]]
 
     recommended_story_tuple_list = []
-    #
-    recommended_story_author_list = []
-    all_stages = list(Stage.objects.all().order_by('pk'))
     for story in recommended_story_list:
-        curr_story_author_list = []
-        for stage in all_stages:
-            if stage.story == story:
-                curr_story_author_list.append(stage.user.name)
-                # curr_story_author_list.append(stage.user.username)
-        recommended_story_author_list.append(", ".join(curr_story_author_list))
-    recommended_story_pk_list = [story.pk for story in recommended_story_list]
-    recommended_story_genre_list = [story.genre for story in recommended_story_list]
-    recommended_story_title_list = [story.title for story in recommended_story_list]
-    for i in range(len(recommended_story_list)):
-        recommended_story_tuple_list.append((recommended_story_list[i], recommended_story_author_list[i], recommended_story_pk_list[i], recommended_story_genre_list[i], recommended_story_title_list[i]))
+        authors = [stage.user.name or stage.user.username for stage in all_stages if stage.story == story]
+        recommended_story_tuple_list.append((
+            story, ", ".join(authors), story.pk, story.genre, story.title
+        ))
 
     context = {
         'username': username,
         'isLogin': True,
         'isAdmin': isAdmin,
+        'story_tuple_list': story_tuple_list,
+        'recommended_story_tuple_list': recommended_story_tuple_list,
         'story_list': story_list,
         'story_exposition_list': story_author_list,
         'story_pk_list': story_pk_list,
         'story_genre_list': story_genre_list,
         'story_title_list': story_title_list,
-        'recommended_story_tuple_list': recommended_story_tuple_list,
-        'story_tuple_list': story_tuple_list,
     }
 
     return render(request, 'read.html', context)
@@ -467,56 +415,37 @@ def to_collaborate(request, id):
 
     curr_story_stages = Stage.objects.filter(story=curr_story).order_by('part')
 
-    curr_story_exposition = Stage.objects.filter(story=curr_story, part=1)[0]
-
-    exposition_text = curr_story_exposition.text
-
-    # from keybert import KeyBERT
-    # kw_model = KeyBERT()
-    # keywords_mmr = kw_model.extract_keywords(exposition_text, keyphrase_ngram_range=(1, 1), stop_words='english',
-    #                                          use_mmr=True,
-    #                                          top_n=5, diversity=0.3)
-    # keyword_list = [km[0] for km in keywords_mmr] # ['a', 'b', 'c', 'd', 'e']
-    #
-    # suggested_keyword = ", ".join(keyword_list)
+    # Calculate the current part to be written (next part)
+    curr_part = len(curr_story_stages) + 1
+    if curr_part > 5:
+        curr_part = 5  # Cap at 5 (Resolution)
 
     context = {
         'isAdmin': isAdmin,
         'curr_story': curr_story,
         'curr_story_stages': curr_story_stages,
-
         'pk': curr_story.pk,
+        'curr_part': curr_part,  # ✅ Add this
     }
 
     if request.method == 'POST':
-        curr_user = request.user
-
         curr_text = request.POST.get('text')
-
-        story = curr_story
-        user = curr_user
         import datetime
-        today_year = str(datetime.datetime.today().year)
-        today_month = str(datetime.datetime.today().month)
-        today_day = str(datetime.datetime.today().day)
-        submitted_date = "-".join([today_year, today_month, today_day])
-        part = len(curr_story_stages)+1
-        status = 1
-        text = curr_text
+        today = datetime.datetime.today().strftime("%Y-%m-%d")
 
         new_stage = Stage(
-            story=story,
-            user = user,
-            submitted_date = submitted_date,
-            part = part,
-            status = status,
-            text = text,
+            story=curr_story,
+            user=curr_user,
+            submitted_date=today,
+            part=curr_part,
+            status=1,
+            text=curr_text,
         )
         new_stage.save()
-
         return redirect('to-main')
 
     return render(request, 'collaborate.html', context)
+
 
 @login_required
 def to_inprogress(request):

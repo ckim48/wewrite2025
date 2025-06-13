@@ -48,7 +48,7 @@
       font-weight: 500;
       display: block;
       margin-bottom: 8px;
-      font-size: 14px;
+      font-size: 16px;
     }
 
     input[type="text"], textarea {
@@ -157,4 +157,29 @@
       </form>
     </div>
   </div>
+  <div id="loading-screen" style="
+  position:fixed;
+  display: none;
+  top:0;
+  left:0;
+  width:100vw;
+  height:100vh;
+  background: rgba(255,255,255, 0.5);
+  z-index: 9999;
+  justify-content: center;
+  align-items:center;
+  ">
+    <div class="text-center">
+      <h3 style="font-size: 21px; color: #3c3f58;">Generating keywords and summary... Please Wait.</h3>
+      <div class="spinner-border text-secondary" role="status" style="width: 2.7rem; height: 2.7rem">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+  </div>
+  <script>
+    document.querySelector('form').addEventListener('submit', function(){
+        document.getElementById('loading-screen').style.display = "flex";
+    });
+  </script>
+
 {% endblock %}

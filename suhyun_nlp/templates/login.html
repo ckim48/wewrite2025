@@ -1,5 +1,23 @@
 {% extends 'header.html' %}
 {% block login %}
+<style>
+     button[type="submit"] {
+      background: #3c3f58;
+      color: #fff;
+      padding: 9px 18px;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      transition: background 0.3s;
+      width: 100%;
+    }
+
+    button[type="submit"]:hover {
+      background: #2c2e44;
+    }
+</style>
 <body id="login">
 
   <div class="login-container">
@@ -17,9 +35,18 @@
         <label for="password" class="form-label">Password</label>
         <input name="password" type="password" class="form-control" id="password" placeholder="Enter your password">
       </div>
-      <button type="submit" class="btn btn-primary w-100">Login</button>
+
+    {% if messages %}
+      <div class="container mt-3">
+        {% for message in messages %}
+            <p style="color:red;">{{ message }}</p>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+      <button type="submit" class="w-100">Login</button>
     </form>
-    <p class="form-text mt-3">Don't have an account? <a href="{% url 'to-signup' %}">Register here</a></p>
+    <p class="form-text mt-3">Don't have an account? <a href="{% url 'to-signup' %}" style="color:#3c3f58;">Register here</a></p>
   </div>
 
 </body>

@@ -200,13 +200,10 @@
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
   }
 
-  #highlights h2 {
-    font-weight: bold;
-    color: #343a40;
-  }
+
 
   .highlight-card i {
-    color: #007bff;
+    color: #3c3f58;
   }
 
   .highlight-card h5 {
