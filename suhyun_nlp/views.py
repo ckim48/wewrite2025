@@ -214,10 +214,16 @@ def to_main(request):
         for all_stage in all_stages:
             if all_stage.story == story:
                 curr_story_stage_list.append(all_stage)
+
+        if not curr_story_stage_list:
+            continue  # skip stories with no stages
+
         if len(curr_story_stage_list) == 5:
             continue
-        if curr_story_stage_list[-1].status!=3:
+
+        if curr_story_stage_list[-1].status != 3:
             continue
+
         story_list.append(story)
         story_last_stage_part_list.append(curr_story_stage_list[-1].PART_CHOICES[curr_story_stage_list[-1].part][1])
 

@@ -53,6 +53,62 @@
     font-size: 36px;
       margin-bottom: 60px;
   }
+    .stats-section {
+    background: linear-gradient(to right, #f7f9fc, #eef1f6);
+    border-top: 1px solid #d1d8e0;
+    padding: 60px 0;
+  }
+
+  .stat-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 25px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    transition: transform 0.2s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-6px);
+  }
+
+  .stat-title {
+    font-weight: 700;
+    font-size: 1.1rem;
+    text-align: center;
+    margin-bottom: 20px;
+    color: #3c3f58;
+    flex-shrink: 0;
+  }
+
+  .stat-card canvas {
+    flex-grow: 1;
+    height: 260px !important;
+    max-height: 260px;
+  }
+.contact-email-link {
+  background: #f2f4f8;
+  color: #3c3f58;
+  font-weight: 600;
+  padding: 12px 20px;
+  border-radius: 30px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  transition: background 0.3s, transform 0.2s;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.contact-email-link:hover {
+  background: #e0e4ef;
+  transform: translateY(-2px);
+  text-decoration: none;
+  color: #3c3f58;
+}
+
 </style>
 <section id="hero" class="d-flex flex-column justify-content-center align-items-center">
   <div class="container text-center text-md-left">
@@ -111,44 +167,37 @@
     </div>
   </div>
 </section>
-<section id="statistics" class="py-5">
-
-<div class="container mt-4">
-      <h2 class="section-title" data-aos="fade-right">Statistics</h2>
-
-    <div class="row">
-
-      <div class="col-md-6">
-        <div class="chart-container">
-          <div class="chart-header">Genre Ratio</div>
+<section id="statistics" class="stats-section">
+  <div class="container">
+    <h2 class="section-title-gradient text-center" data-aos="fade-up">Statistics Overview</h2>
+    <div class="row g-4 mt-3">
+      <div class="col-lg-6 col-xl-4">
+        <div class="stat-card" data-aos="fade-up">
+          <div class="stat-title">Genre Ratio</div>
           <canvas id="genreRatioChart"></canvas>
         </div>
       </div>
-      <div class="col-md-6">
-        <div class="chart-container">
-          <div class="chart-header">Sentiment Ratio</div>
+      <div class="col-lg-6 col-xl-4">
+        <div class="stat-card" data-aos="fade-up" data-aos-delay="100">
+          <div class="stat-title">Sentiment Ratio</div>
           <canvas id="sentimentRatioChart"></canvas>
         </div>
       </div>
-    </div>
-    <div class="row">
-      <div class="col-md-6">
-        <div class="chart-container">
-          <div class="chart-header">Most Used Words</div>
+      <div class="col-lg-6 col-xl-4">
+        <div class="stat-card" data-aos="fade-up" data-aos-delay="200">
+          <div class="stat-title">Most Used Words</div>
           <canvas id="mostUsedWordsChart"></canvas>
         </div>
       </div>
-      <div class="col-md-6">
-        <div class="chart-container">
-          <div class="chart-header">Most Read Novels (Top 5)</div>
+      <div class="col-lg-6 col-xl-6">
+        <div class="stat-card" data-aos="fade-up" data-aos-delay="300">
+          <div class="stat-title">Most Read Novels (Top 5)</div>
           <canvas id="mostReadNovelsChart"></canvas>
         </div>
       </div>
-    </div>
-    <div class="row">
-      <div class="col-md-6 offset-md-3">
-        <div class="chart-container">
-          <div class="chart-header">Most Contributed Authors (Top 5)</div>
+      <div class="col-lg-6 col-xl-6">
+        <div class="stat-card" data-aos="fade-up" data-aos-delay="400">
+          <div class="stat-title">Top 5 Authors</div>
           <canvas id="mostContributedAuthorsChart"></canvas>
         </div>
       </div>
@@ -156,132 +205,146 @@
   </div>
 </section>
 
-<section id="contact" class="py-5">
-  <div class="container mt-4">
-    <h2 class="section-title" data-aos="fade-right">Contact Us</h2>
+
+<section id="contact" class="py-5 stats-section">
+  <div class="container">
+    <h2 class="section-title-gradient text-center mb-5" data-aos="fade-up">Contact Us</h2>
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <div class="stat-card text-center p-4" data-aos="zoom-in">
+          <p class="fs-5 fw-semibold mb-2">We’d love to hear from you</p>
+          <p class="text-muted mb-4">Have questions, feedback, or ideas for collaboration? Reach out via email anytime.</p>
+          <div class="d-flex justify-content-center">
+            <a href="mailto:your@email.com" class="contact-email-link">
+              <i class="bi bi-envelope-fill me-2"></i> your@email.com
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
+
+
+<footer class="bg-dark text-white text-center py-4">
+  <div class="container">
+    <p class="mb-1">&copy; 2025 WeWrite. All rights reserved.</p>
+    <p class="mb-0">Made with for creative minds</p>
+  </div>
+</footer>
+
  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script>
-    const genreRatioCtx = document.getElementById('genreRatioChart').getContext('2d');
-    new Chart(genreRatioCtx, {
-      type: 'pie',
-      data: {
-        labels: ['Fantasy', 'Romance', 'Thriller', 'Sci-Fi', 'Others'],
-        datasets: [{
-          data: [30, 25, 20, 15, 10],
-          backgroundColor: ['#4e79a7', '#f28e2b', '#e15759', '#76b7b2', '#59a14f'],
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: {
-            position: 'top',
-          },
-        },
-      },
-    });
+<script>
+  new Chart(document.getElementById('genreRatioChart'), {
+    type: 'pie',
+    data: {
+      labels: ['Fantasy', 'Romance', 'Thriller', 'Sci-Fi', 'Others'],
+      datasets: [{
+        data: [30, 25, 20, 15, 10],
+        backgroundColor: ['#4e79a7', '#f28e2b', '#e15759', '#76b7b2', '#59a14f']
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'top' }
+      }
+    }
+  });
 
-    const sentimentRatioCtx = document.getElementById('sentimentRatioChart').getContext('2d');
-    new Chart(sentimentRatioCtx, {
-      type: 'doughnut',
-      data: {
-        labels: ['Positive', 'Negative', 'Neutral'],
-        datasets: [{
-          data: [50, 20, 30],
-          backgroundColor: ['#59a14f', '#e15759', '#f28e2b'],
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: {
-            position: 'top',
-          },
-        },
-      },
-    });
+  new Chart(document.getElementById('sentimentRatioChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Positive', 'Negative', 'Neutral'],
+      datasets: [{
+        data: [50, 20, 30],
+        backgroundColor: ['#59a14f', '#e15759', '#f28e2b']
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'top' }
+      }
+    }
+  });
 
-    const mostUsedWordsCtx = document.getElementById('mostUsedWordsChart').getContext('2d');
-    new Chart(mostUsedWordsCtx, {
-      type: 'bar',
-      data: {
-        labels: ['Love', 'Adventure', 'Hero', 'Mystery', 'Dream'],
-        datasets: [{
-          label: 'Word Frequency',
-          data: [100, 80, 60, 50, 40],
-          backgroundColor: '#4e79a7',
-        }]
+  new Chart(document.getElementById('mostUsedWordsChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Love', 'Adventure', 'Hero', 'Mystery', 'Dream'],
+      datasets: [{
+        label: 'Word Frequency',
+        data: [100, 80, 60, 50, 40],
+        backgroundColor: '#4e79a7'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false }
       },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: {
-            display: false,
-          },
-        },
-        scales: {
-          y: {
-            beginAtZero: true,
-          },
-        },
-      },
-    });
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
 
-    const mostReadNovelsCtx = document.getElementById('mostReadNovelsChart').getContext('2d');
-    new Chart(mostReadNovelsCtx, {
-      type: 'horizontalBar',
-      data: {
-        labels: ['Novel A', 'Novel B', 'Novel C', 'Novel D', 'Novel E'],
-        datasets: [{
-          label: 'Readers',
-          data: [500, 400, 300, 200, 100],
-          backgroundColor: '#76b7b2',
-        }]
+  new Chart(document.getElementById('mostReadNovelsChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Novel A', 'Novel B', 'Novel C', 'Novel D', 'Novel E'],
+      datasets: [{
+        label: 'Readers',
+        data: [500, 400, 300, 200, 100],
+        backgroundColor: '#76b7b2'
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'top' }
       },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: {
-            position: 'top',
-          },
-        },
-        scales: {
-          x: {
-            beginAtZero: true,
-          },
-        },
-      },
-    });
+      scales: {
+        x: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
 
-    const mostContributedAuthorsCtx = document.getElementById('mostContributedAuthorsChart').getContext('2d');
-    new Chart(mostContributedAuthorsCtx, {
-      type: 'bar',
-      data: {
-        labels: ['Author A', 'Author B', 'Author C', 'Author D', 'Author E'],
-        datasets: [{
-          label: 'Contributions',
-          data: [50, 40, 35, 30, 25],
-          backgroundColor: '#f28e2b',
-        }]
+  new Chart(document.getElementById('mostContributedAuthorsChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Author A', 'Author B', 'Author C', 'Author D', 'Author E'],
+      datasets: [{
+        label: 'Contributions',
+        data: [50, 40, 35, 30, 25],
+        backgroundColor: '#f28e2b'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'top' }
       },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: {
-            position: 'top',
-          },
-        },
-        scales: {
-          y: {
-            beginAtZero: true,
-          },
-        },
-      },
-    });
-  </script>
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+</script>
 </body>
 {% endblock %}
 </html>
