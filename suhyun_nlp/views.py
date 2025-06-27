@@ -106,7 +106,6 @@ def to_write(request):
 
     genre_list = Genre.objects.filter(is_active=True)
 
-    genre_name_list = [g.name for g in genre_list]
     genre_name_list = ['Fiction', 'Science Fiction', 'Historical Fiction', 'Mystery', 'Fantasy', 'Romance']
 
     isAdmin= curr_user.is_staff
@@ -125,16 +124,17 @@ def to_write(request):
         title = request.POST.get('title')
 
         selected_genre_names = request.POST.getlist('selected_genre[]')  # get all selected genres as list
-
+        print(selected_genre_names)
         if not selected_genre_names:
-            messages.error(request, "Please select at least one genre.")
+            print(request, "Please select at least one genre.")
             return redirect('to-write')
 
-        # Get the first valid genre (or handle all if needed)
-        genre = selected_genre_names[0]
-
-        if not genre:
-            messages.error(request, "Selected genre(s) not found in database.")
+        genre_name = selected_genre_names[0]
+        try:
+            print(genre_name)
+            genre = Genre.objects.get(name=genre_name)
+        except Genre.DoesNotExist:
+            print(request, "Selected genre(s) not found in database.")
             return redirect('to-write')
 
         maincharacter = request.POST.get('maincharacter')
@@ -183,7 +183,7 @@ def to_write(request):
             user = user,
             submitted_date = started_date,
             part = 1,
-            status = 1,
+            status = 3,
             text = exposition,
         )
         new_stage.save()
@@ -216,13 +216,14 @@ def to_main(request):
                 curr_story_stage_list.append(all_stage)
 
         if not curr_story_stage_list:
-            continue  # skip stories with no stages
+            continue  # skip if no stages yet
 
         if len(curr_story_stage_list) == 5:
-            continue
+            continue  # completed
 
-        if curr_story_stage_list[-1].status != 3:
-            continue
+        # check if there's at least one accepted stage
+        if not any(stage.status == 3 for stage in curr_story_stage_list):
+            continue  # not started properly
 
         story_list.append(story)
         story_last_stage_part_list.append(curr_story_stage_list[-1].PART_CHOICES[curr_story_stage_list[-1].part][1])
@@ -264,8 +265,16 @@ def to_read(request):
     isAdmin = curr_user.is_staff
     username = curr_user.username
 
-    all_stories = Story.objects.all().order_by('started_date')  # ✅ show all stories regardless of status
-    story_list = list(all_stories)
+    all_storys = Story.objects.all().order_by('started_date')
+    accepted_stages = list(Stage.objects.filter(status=3).order_by('pk'))
+
+    all_stories = []
+    for story in all_storys:
+        accepted_for_story = [s for s in accepted_stages if s.story_id == story.id]
+        if len(accepted_for_story) == 5:
+            all_stories.append(story)
+
+    story_list = all_stories
 
     all_stages = list(Stage.objects.all().order_by('pk'))
 
@@ -331,16 +340,25 @@ def to_read(request):
 
     recommended_story_tuple_list = []
     for story in recommended_story_list:
-        authors = [stage.user.name or stage.user.username for stage in all_stages if stage.story == story]
+        authors = []
+        for stage in all_stages:
+            if stage.story == story:
+                name = stage.user.name or stage.user.username
+                short_name = name.split('@')[0]  # Trim email to username
+                authors.append(short_name)
         recommended_story_tuple_list.append((
             story, ", ".join(authors), story.pk, story.genre, story.title
         ))
 
+    formatted_list = []
+    for story, author, pk, genre, title in story_tuple_list:
+        username = author.split('@')[0]
+        formatted_list.append((story, username, pk, genre, title))
     context = {
         'username': username,
         'isLogin': True,
         'isAdmin': isAdmin,
-        'story_tuple_list': story_tuple_list,
+        "story_tuple_list": formatted_list,
         'recommended_story_tuple_list': recommended_story_tuple_list,
         'story_list': story_list,
         'story_exposition_list': story_author_list,
@@ -444,7 +462,7 @@ def to_collaborate(request, id):
             user=curr_user,
             submitted_date=today,
             part=curr_part,
-            status=1,
+            status=3,
             text=curr_text,
         )
         new_stage.save()
