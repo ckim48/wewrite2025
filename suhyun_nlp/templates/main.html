@@ -146,24 +146,64 @@
         .science-fiction { background-color: white; color: #4caf50; }
         .fantasy { background-color: white; color: #673ab7; }
         .fiction { background-color: white; color: #ff9800; }
+        .floating-write-btn {
+  position: fixed;
+  bottom: 25px;
+  right: 25px;
+  background: #6c63ff;
+  color: white;
+/*  padding: 14px 1px;*/
+            padding: 14px;
+  border-radius: 50%;
+  font-size: 20px;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+  text-align: center;
+  transition: background 0.3s ease;
+  z-index: 1000;
+}
+
+.floating-write-btn:hover {
+  background: #4a43d6;
+  color: #fff;
+  text-decoration: none;
+}
+
     </style>
 </head>
 <body>
 
-    <div class="top-bar">
-        <div id="filters" class="button-group">
-            <button class="button active" data-filter="*">All</button>
-            <button class="button" data-filter=".science-fiction">Science Fiction</button>
-            <button class="button" data-filter=".fantasy">Fantasy</button>
-            <button class="button" data-filter=".fiction">Fiction</button>
-        </div>
-
-        {% if new_story_available %}
-            <a class="button" href="{% url 'to-write' %}">Start New Story</a>
-        {% else %}
-            <a class="fakebutton">Start New Story</a>
-        {% endif %}
+<div class="top-bar d-flex justify-content-between align-items-center flex-wrap">
+  <!-- Search bar on the left -->
+  <div class="search-container d-flex align-items-center px-3 py-1 mb-3" style="border: 1.5px solid #ccc; border-radius: 10px; height: 42px; max-width: 600px; flex-grow: 1;">
+    <i class="bi bi-search me-2" style="font-size: 1rem; color: #666;"></i>
+    <input type="text" id="boardSearchInput" class="form-control border-0 shadow-none bg-transparent p-0 ps-1"
+           placeholder="Search story titles..." style="font-size: 0.95rem; line-height: 1.2rem; height: 100%;">
+    <div class="dropdown">
+      <button class="btn border-0 bg-transparent p-0 ms-2" type="button" id="boardGenreDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="bi bi-sliders" style="font-size: 1rem; color: #666;"></i>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end" id="boardGenreDropdownMenu">
+        <li><a class="dropdown-item active" href="#" data-filter="*">All</a></li>
+        <li><a class="dropdown-item" href="#" data-filter=".science-fiction">Science Fiction</a></li>
+        <li><a class="dropdown-item" href="#" data-filter=".historical-fiction">Historical Fiction</a></li>
+        <li><a class="dropdown-item" href="#" data-filter=".fantasy">Fantasy</a></li>
+        <li><a class="dropdown-item" href="#" data-filter=".fiction">Fiction</a></li>
+        <li><a class="dropdown-item" href="#" data-filter=".mistery">Mistery</a></li>
+        <li><a class="dropdown-item" href="#" data-filter=".romance">Romance</a></li>
+      </ul>
     </div>
+  </div>
+
+  <!-- Start New Story on the right -->
+  <div class="mb-3 ms-3">
+    {% if new_story_available %}
+      <a class="button" href="{% url 'to-write' %}">Start New Story</a>
+    {% else %}
+      <a class="fakebutton">Start New Story</a>
+    {% endif %}
+  </div>
+</div>
+
 
     <div id="story-grid">
         {% for story, exposition, pk, genre, title, last_part in story_tuple_list %}
@@ -175,6 +215,12 @@
                     <span class="genre science-fiction">{{ genre.name | title}}</span>
                 {% elif genre.name == 'fantasy' %}
                     <span class="genre fantasy">{{ genre.name | title}}</span>
+                {% elif genre.name == 'historical fiction' %}
+                    <span class="genre historical-fiction">{{ genre.name | title}}</span>
+                {% elif genre.name == 'mistery' %}
+                    <span class="genre mistery">{{ genre.name | title}}</span>
+                {% elif genre.name == 'romance' %}
+                    <span class="genre romance">{{ genre.name | title}}</span>
                 {% else %}
                     <span class="genre">{{ genre.name | title}}</span>
                 {% endif %}
@@ -192,27 +238,51 @@
         </a>
         {% endfor %}
     </div>
+{% if new_story_available %}
+<a href="{% url 'to-write' %}" class="floating-write-btn" title="Start New Story">
+  <i class="bi bi-pencil-square"></i>
+</a>
+{% endif %}
 
-    <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const iso = new Isotope("#story-grid", {
-            itemSelector: ".post-card",
-            layoutMode: "masonry"
-        });
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const iso = new Isotope("#story-grid", {
+    itemSelector: ".post-card",
+    layoutMode: "masonry"
+  });
 
-        const filterButtons = document.querySelectorAll("#filters .button");
-        filterButtons.forEach((btn) => {
-            btn.addEventListener("click", function () {
-                const filterValue = this.getAttribute("data-filter");
-                iso.arrange({ filter: filterValue });
+  // Genre filtering
+  document.querySelectorAll('#boardGenreDropdownMenu a').forEach(item => {
+    item.addEventListener('click', function (e) {
+      e.preventDefault();
+      document.querySelector('#boardGenreDropdownMenu .active')?.classList.remove('active');
+      this.classList.add('active');
+      document.getElementById('boardGenreDropdown').innerHTML = `<i class="bi bi-sliders" style="font-size: 1rem; color: #666;"></i>`;
 
-                // Toggle active class
-                filterButtons.forEach(b => b.classList.remove("active"));
-                this.classList.add("active");
-            });
-        });
+      const filterValue = this.getAttribute("data-filter");
+      iso.arrange({ filter: filterValue });
+
+      // trigger search again
+      document.getElementById("boardSearchInput").dispatchEvent(new Event("input"));
     });
-    </script>
+  });
+
+  // Search input logic
+  document.getElementById("boardSearchInput").addEventListener("input", function () {
+    const searchTerm = this.value.toLowerCase();
+    const genreFilter = document.querySelector("#boardGenreDropdownMenu .active").getAttribute("data-filter");
+
+    iso.arrange({
+      filter: function (itemElem) {
+        const title = itemElem.querySelector(".post-title")?.innerText.toLowerCase();
+        const genreMatch = genreFilter === "*" || itemElem.classList.contains(genreFilter.slice(1));
+        return genreMatch && title.includes(searchTerm);
+      }
+    });
+  });
+});
+</script>
+
 </body>
 </html>
 {% endblock %}

@@ -35,4 +35,7 @@ urlpatterns = [
     path('detail/<int:id>/', views.to_detail, name='to-detail'),
     path('collaborate/<int:id>/', views.to_collaborate, name='to-collaborate'),
     path('inprogress/', views.to_inprogress, name='to-inprogress'),
+    path('delete_story/<int:pk>/', views.to_delete_story, name='delete_story'),
+    path('detail/<int:id>/', views.to_detail, name='to-detail'),
+    path('delete-comment/<int:comment_id>/', views.delete_comment, name='delete-comment'),
 ]

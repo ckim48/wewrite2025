@@ -40,6 +40,14 @@ class Story(models.Model):
     def __str__(self):
         return "_".join([self.user.username, str(self.started_date), self.title])
 
+class Comment(models.Model):
+    story = models.ForeignKey(Story, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    text = models.TextField(max_length=2000)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} on {self.story.title}"
 
 class Stage(models.Model):
     PART_CHOICES = [

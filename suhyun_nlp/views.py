@@ -13,11 +13,17 @@ from member.models import *  # Importing CustomUser model from manager app
 
 
 def to_index(request):
-    # Redirect to counselor-main page if user is already authenticated
-    # if request.user.is_authenticated:
-    #     return redirect('to-main')
+    is_login = request.user.is_authenticated
+    is_admin = request.user.is_staff if is_login else False
+    username = request.user.username if is_login else ""
 
-    return render(request, 'index.html', {})
+    context = {
+        'isLogin': is_login,
+        'isAdmin': is_admin,
+        'username': username,
+    }
+
+    return render(request, 'index.html', context)
 
 
 def to_login(request):
@@ -183,7 +189,7 @@ def to_write(request):
             user = user,
             submitted_date = started_date,
             part = 1,
-            status = 3,
+            status = 1,
             text = exposition,
         )
         new_stage.save()
@@ -344,16 +350,18 @@ def to_read(request):
         for stage in all_stages:
             if stage.story == story:
                 name = stage.user.name or stage.user.username
-                short_name = name.split('@')[0]  # Trim email to username
+                short_name = name.split('@')[0]
                 authors.append(short_name)
+        genre_slug = story.genre.name.lower().replace(' ', '')
         recommended_story_tuple_list.append((
-            story, ", ".join(authors), story.pk, story.genre, story.title
+            story, ", ".join(authors), story.pk, story.genre, story.title, genre_slug
         ))
 
     formatted_list = []
     for story, author, pk, genre, title in story_tuple_list:
         username = author.split('@')[0]
-        formatted_list.append((story, username, pk, genre, title))
+        genre_slug = genre.name.lower().replace(" ", "")
+        formatted_list.append((story, username, pk, genre, title, genre_slug))
     context = {
         'username': username,
         'isLogin': True,
@@ -365,71 +373,83 @@ def to_read(request):
         'story_pk_list': story_pk_list,
         'story_genre_list': story_genre_list,
         'story_title_list': story_title_list,
+        'all_genres': all_genres
     }
 
     return render(request, 'read.html', context)
-
 @login_required
 def to_detail(request, id):
-    curr_story = Story.objects.get(pk=id)
+    import os, pickle
+    from pathlib import Path
 
     curr_user = request.user
     isAdmin = curr_user.is_staff
-
-    from pathlib import Path
-    # Build paths inside the project like this: BASE_DIR / 'subdir'.
-    BASE_DIR = Path(__file__).resolve().parent.parent
-
-    import pickle
-    import os
     username = curr_user.username
-    picklefile_name = os.path.join(BASE_DIR, 'static') + "/pickle/" + str(curr_user.pk) + '.pickle'
+
+    # Get the story and related stages
+    curr_story = get_object_or_404(Story, pk=id)
+    curr_story_stages = Stage.objects.filter(story=curr_story).order_by('part')
+    curr_story_author_list = [stage.user.username for stage in curr_story_stages]
+    curr_story_authors = ", ".join(curr_story_author_list)
+
+    # Load or initialize user reading history
+    BASE_DIR = Path(__file__).resolve().parent.parent
+    picklefile_name = os.path.join(BASE_DIR, 'static', 'pickle', f'{curr_user.pk}.pickle')
     if os.path.isfile(picklefile_name):
-        with open(file=picklefile_name, mode='rb') as f:
+        with open(picklefile_name, 'rb') as f:
             user_history_dict = pickle.load(f)
-
     else:
-        user_history_dict = {
-            'genre_pk_list': [],
-            'genre_cnt_list': []
-        }
+        user_history_dict = {'genre_pk_list': [], 'genre_cnt_list': []}
 
+    # Update user reading history
     curr_genre_pk = curr_story.genre.pk
-
     if curr_genre_pk in user_history_dict['genre_pk_list']:
-        user_history_dict['genre_cnt_list'][user_history_dict['genre_pk_list'].index(curr_genre_pk)] += 1
+        idx = user_history_dict['genre_pk_list'].index(curr_genre_pk)
+        user_history_dict['genre_cnt_list'][idx] += 1
     else:
         user_history_dict['genre_pk_list'].append(curr_genre_pk)
         user_history_dict['genre_cnt_list'].append(1)
 
-    print(user_history_dict)
-
-
-
-    with open(file=picklefile_name, mode='wb') as f:
+    with open(picklefile_name, 'wb') as f:
         pickle.dump(user_history_dict, f)
 
-    curr_story_stages = Stage.objects.filter(story=curr_story).order_by('part')
-    curr_story_author_list = []
-    for css in curr_story_stages:
-        curr_story_author_list.append(css.user.username)
-    curr_story_authors = ", ".join(curr_story_author_list)
-    curr_story_text_list = []
-    for css in curr_story_stages:
-        curr_story_text_list.append(css.text)
-    curr_story_texts = "\n\n".join(curr_story_text_list)
+    # Handle comment form submission
+    if request.method == "POST":
+        comment_text = request.POST.get("comment_text")
+        if comment_text:
+            Comment.objects.create(
+                story=curr_story,
+                user=curr_user,
+                text=comment_text,
+            )
+            return redirect('to-detail', id=curr_story.id)
 
-
+    # Load all comments for the story
+    comments = Comment.objects.filter(story=curr_story).order_by('-created_at')
 
     context = {
         'isAdmin': isAdmin,
+        'username': username,
+        'isLogin': True,
         'curr_story': curr_story,
         'curr_story_stages': curr_story_stages,
         'curr_story_authors': curr_story_authors,
-        'curr_story_texts': curr_story_texts,
+        'comments': comments,
     }
 
     return render(request, 'detail.html', context)
+
+
+@login_required
+def delete_comment(request, comment_id):
+    comment = get_object_or_404(Comment, id=comment_id)
+
+    if request.user == comment.user or request.user.is_staff:
+        story_id = comment.story.id
+        comment.delete()
+        return redirect('to-detail', id=story_id)
+
+    return redirect('to-detail', id=comment.story.id)
 
 @login_required
 def to_collaborate(request, id):
@@ -551,23 +571,59 @@ def to_inprogress(request):
     }
 
     return render(request, 'inprogress.html', context)
-
 @login_required
 def to_genre_management(request):
     curr_user = request.user
     isAdmin = curr_user.is_staff
     username = curr_user.username
 
+    # Genre Management Context
     active_genres = Genre.objects.filter(is_active=True).order_by('pk')
+
+    # In-Progress Management Context
+    pending_stages = list(Stage.objects.filter(status='1').order_by('pk'))
+    pending_stage_part_list = [stage.PART_CHOICES[stage.part-1][1] for stage in pending_stages]
+    stage_tuple_list = [(pending_stages[i], pending_stage_part_list[i]) for i in range(len(pending_stages))]
+    pending_stage_pk_list = [s.pk for s in pending_stages]
+    pending_stage_text_list = [s.text for s in pending_stages]
+
+    pending_storys = Story.objects.filter(status=1).order_by('started_date')
+    pending_story_list = list(pending_storys)
+
+    ready_to_publish_story_list = []
+    accepted_stages = list(Stage.objects.filter(status=3).order_by('pk'))
+    for pending_story in pending_story_list:
+        curr_story_stages = [stage for stage in accepted_stages if stage.story == pending_story]
+        if len(curr_story_stages) == 5:
+            ready_to_publish_story_list.append(pending_story)
 
     context = {
         'username': username,
         'isLogin': True,
         'isAdmin': isAdmin,
         'active_genres': active_genres,
+        'stage_tuple_list': stage_tuple_list,
+        'ready_to_publish_story_list': ready_to_publish_story_list,
+        'pending_stage_pk_list': pending_stage_pk_list,
+        'pending_stage_text_list': pending_stage_text_list,
     }
 
     return render(request, 'genre_management.html', context)
+
+@login_required
+def to_delete_story(request, pk):
+    curr_user = request.user
+    if not curr_user.is_staff:
+        return HttpResponse("Unauthorized", status=401)
+
+    try:
+        story = Story.objects.get(pk=pk)
+        story.delete()
+        messages.success(request, "Story deleted successfully.")
+    except Story.DoesNotExist:
+        messages.error(request, "Story not found.")
+
+    return redirect('to-read')
 
 @login_required
 def to_add_genre(request):
@@ -578,7 +634,7 @@ def to_add_genre(request):
     if request.method == 'POST':
         curr_user = request.user
 
-        name = request.POST.get('name')
+        name = request.POST.get('name').title()
         genre_delete_check = request.POST.get('genre_delete_check')
         print(genre_delete_check)
         # TODO: Genre에 이미지 저장할 필드 생성하고 추가할 수 있게 바꿔야함
@@ -611,8 +667,7 @@ def to_delete_genre(request):
         print(delete_genre_pk_list)
         for delete_genre_pk in delete_genre_pk_list:
             delete_genre = Genre.objects.get(pk=delete_genre_pk)
-            delete_genre.is_active=False
-            delete_genre.save()
+            delete_genre.delete()
 
         return redirect('to-genremanagement')
 

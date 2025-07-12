@@ -1,212 +1,242 @@
 {% extends 'header.html' %}
 {% block read %}
-    <title>Genre Management</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<title>Genre Management & Submissions</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f8f9fa;
-        }
+<style>
+  body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f8fafc;
+    color: #333;
+  }
+  h3, h4 {
+    font-weight: 700;
+  }
+  .section-title {
+    border-left: 5px solid #4e73df;
+    padding-left: 12px;
+    margin-bottom: 20px;
+  }
+  .card-custom {
+    background: linear-gradient(145deg, #ffffff, #f0f0f0);
+    padding: 24px;
+    border-radius: 20px;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .card-custom:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 18px 28px rgba(0, 0, 0, 0.12);
+  }
+  .genre-input, .form-select, textarea {
+    font-size: 0.95rem;
+    border-radius: 8px;
+  }
+  .btn-custom {
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 10px 20px;
+  }
+  .btn-primary { background-color: #4e73df; border: none; }
+  .btn-primary:hover { background-color: #2e59d9; }
+  .btn-danger { background-color: #e74a3b; border: none; }
+  .btn-danger:hover { background-color: #c0392b; }
+  .btn-secondary:hover { background-color: #5a6268; }
+  .genre-badge {
+    background-color: #e0e7ff;
+    color: #3730a3;
+    font-weight: 600;
+    border-radius: 12px;
+    padding: 6px 14px;
+    display: inline-block;
+    font-size: 0.85rem;
+    margin-bottom: 0px;
+  }
+  .submission-details p {
+    font-size: 0.9rem;
+    margin: 5px 0;
+  }
+  .text-cap {
+    text-transform: capitalize;
+  }
+  .genre-badge {
+  background-color: #e0e7ff;
+  color: #3730a3;
+  font-weight: 600;
+  border-radius: 12px;
+  padding: 6px 14px;
+  display: inline-block;
+  font-size: 0.85rem;
+  margin-bottom: 8px;
+  word-wrap: break-word;
+  white-space: normal;
+  max-width: 100%;
+}
 
-        .genre-container {
-            margin-top: 120px;
-        }
+</style>
 
-        .genre-card {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .genre-list {
-            list-style-type: none;
-            padding: 0;
-            margin-bottom: 15px;
-        }
-
-        .genre-list li {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 5px 0;
-            font-size: 1rem;
-        }
-
-        .delete-btn {
-            background-color: #dc3545;
-            color: white;
-            font-weight: bold;
-            padding: 8px 12px;
-            border-radius: 6px;
-            border: none;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .delete-btn:hover {
-            background-color: #c82333;
-        }
-
-        .add-btn {
-            background-color: #3478f6;
-            color: white;
-            font-weight: bold;
-            padding: 8px 12px;
-            border-radius: 6px;
-            border: none;
-            width: 100px;
-        }
-
-        .add-btn:hover {
-            background-color: #245bb5;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .genre-input {
-            width: 100%;
-            padding: 8px;
-            border-radius: 6px;
-            border: 1px solid #ccc;
-        }
-
-        .file-upload {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .file-upload input {
-            flex-grow: 1;
-        }
-
-        .file-select-btn {
-            background-color: #6c757d;
-            color: white;
-            padding: 8px 12px;
-            border-radius: 6px;
-            border: none;
-            cursor: pointer;
-        }
-
-        .file-select-btn:hover {
-            background-color: #5a6268;
-        }
-
-    </style>
-
-    <div class="container genre-container">
-        <h3 class="text-center fw-bold">Genre Management</h3>
-
-        <div class="row mt-4">
-            <!-- Current List -->
-            <div class="col-md-5">
-                <form action="{% url 'to-delete-genre' %}" method="POST">
-                {% csrf_token %}
-                <div class="genre-card">
-                    <h5 class="fw-bold">Current List</h5>
-                    <ul class="genre-list" id="genreList">
-                        <!--TODO: 장르별 색 등 디자인이 generic하지 않음-->
-                        {% for genre in active_genres %}
-                        <li><span style="color: orange;">{{ genre.name }}</span> <input type="checkbox" id="genre_delete_check" name="genre_delete_check" value="{{ genre.pk }}"></li>
-                        {% endfor %}
-<!--                        <li><span style="color: orange;">Fiction</span> <input type="checkbox"></li>-->
-<!--                        <li><span style="color: green;">Science Fiction</span> <input type="checkbox"></li>-->
-<!--                        <li><span style="color: brown;">Historical Fiction</span> <input type="checkbox"></li>-->
-<!--                        <li><span style="color: blue;">Fantasy</span> <input type="checkbox"></li>-->
-<!--                        <li><span style="color: darkblue;">Mystery</span> <input type="checkbox"></li>-->
-<!--                        <li><span style="color: purple;">Romance</span> <input type="checkbox"></li>-->
-                    </ul>
-<!--                    <button class="delete-btn" onclick="deleteSelectedGenres()">-->
-                    <button class="delete-btn" type="submit">
-                        <i class="fas fa-trash"></i> Delete
-                    </button>
+<div class="container py-5">
+  <!-- Genre Management -->
+  <h3 class="section-title">Genre Management</h3>
+  <div class="row g-5 mb-5">
+    <!-- Current Genres -->
+    <div class="col-md-6">
+      <form action="{% url 'to-delete-genre' %}" method="POST">{% csrf_token %}
+        <div class="card-custom p-4">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0">Existing Genres</h5>
+            <button class="btn btn-danger btn-sm btn-custom px-3" type="submit">
+              <i class="bi bi-trash"></i> Delete Selected
+            </button>
+          </div>
+          <ul class="list-group list-group-flush">
+            {% for genre in active_genres %}
+              <li class="list-group-item d-flex justify-content-between align-items-center text-cap">
+                <span>{{ genre.name|title }}</span>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="genre_delete_check" value="{{ genre.pk }}">
                 </div>
-                </form>
-            </div>
-
-            <!-- Add New Genre -->
-            <div class="col-md-6">
-                <form action="{% url 'to-add-genre' %}" method="POST">
-                {% csrf_token %}
-                <div class="genre-card">
-                    <h5 class="fw-bold">Add New Genre</h5>
-
-                    <div class="form-group">
-                        <label><strong>Genre:</strong></label>
-                        <input type="text" id="genreInput" class="genre-input" name="name" placeholder="Enter genre name">
-                    </div>
-
-                    <div class="form-group">
-                        <label><strong>Image:</strong></label>
-                        <div class="file-upload">
-                            <input type="text" class="genre-input" placeholder="Upload image file (000 x 00)" readonly>
-                            <button class="file-select-btn">Select</button>
-                        </div>
-                    </div>
-
-                    <button class="add-btn" onclick="addGenre()">Add</button>
-                </div>
-                </form>
-            </div>
-
+              </li>
+            {% empty %}
+              <li class="list-group-item text-muted">No genres available.</li>
+            {% endfor %}
+          </ul>
         </div>
+      </form>
     </div>
 
-    <script>
-        function addGenre() {
-            let genreName = document.getElementById("genreInput").value.trim();
+    <!-- Add Genre Form -->
+    <div class="col-md-6">
+      <form action="{% url 'to-add-genre' %}" method="POST">{% csrf_token %}
+        <div class="card-custom p-4">
+          <h5 class="mb-3">Add New Genre</h5>
+          <div class="form-floating mb-3">
+            <input type="text" class="form-control" id="genreNameInput" name="name" placeholder="Adventure" required>
+            <label for="genreNameInput">Genre Name</label>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Upload Image (optional)</label>
+            <div class="input-group">
+              <input type="text" class="form-control genre-input" placeholder="Choose image" readonly>
+              <button class="btn btn-secondary btn-custom" type="button">Select</button>
+            </div>
+          </div>
+          <button class="btn btn-primary w-100 btn-custom" type="submit">
+            <i class="bi bi-plus-circle"></i> Add Genre
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-            if (genreName === "") {
-                alert("Genre name cannot be empty.");
-                return;
-            }
+  <!-- Pending Submissions -->
+  <h3 class="section-title">Pending Submissions</h3>
+  <div class="row g-4">
+    {% for stage, part in stage_tuple_list %}
+    <div class="col-md-6 col-lg-4">
+      <div class="card-custom">
+        <h5 class="mt-2 text-cap">{{ stage.story.title|title }}</h5>
+<div class="mb-2" style="word-break: break-word;">
+  <span class="genre-badge text-cap">{{ stage.story.genre.name|title }}</span>
+</div>
 
-            let genreList = document.getElementById("genreList");
-            let existingGenres = Array.from(genreList.children).map(li => li.innerText.trim().toLowerCase());
+        <div class="submission-details">
+          <p><strong>User:</strong> <span class="text-cap">{{ stage.user.name|title }}</span></p>
+          <p><strong>Part:</strong> {{ part }}</p>
+          <p><strong>Submitted:</strong> {{ stage.submitted_date }}</p>
+          <p><strong>Status:</strong> <span class="text-warning">Pending</span></p>
+          <button class="btn btn-outline-primary w-100 mt-2" data-bs-toggle="modal" data-bs-target="#editModal"
+            onclick="openEditModal('{{stage.story.title}}', '{{stage.story.genre.name}}', '{{stage.pk}}')">Review</button>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
 
-            if (existingGenres.includes(genreName.toLowerCase())) {
-                alert("This genre already exists.");
-                return;
-            }
+  <!-- Ready to Publish -->
+  <h3 class="section-title mt-5">Ready to Be Posted</h3>
+  <div class="row g-4">
+    {% for story in ready_to_publish_story_list %}
+    <div class="col-md-6 col-lg-4">
+      <div class="card-custom">
+        <h5 class="mb-2 text-cap">{{ story.title|title }}</h5>
+<div class="mb-2" style="word-break: break-word;">
+  <span class="genre-badge text-cap">{{ stage.story.genre.name|title }}</span>
+</div>
+        <div class="submission-details">
+          <button class="btn btn-outline-success w-100 mt-2">View Full Story</button>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
 
-            let randomColor = getRandomColor();
-            let newGenre = document.createElement("li");
-            newGenre.innerHTML = `<span style="color: ${randomColor};">${genreName}</span> <input type="checkbox">`;
-            genreList.appendChild(newGenre);
+<!-- Modal for Editing -->
+<form action="{% url 'to-inprogress' %}" method="POST">{% csrf_token %}
+  <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content p-3">
+        <div class="modal-header">
+          <h5 class="modal-title text-cap" id="editModalLabel"></h5>
+          <p class="ms-3 text-muted text-cap" id="editModalGenre"></p>
+          <input type="hidden" id="editModalPk" name="pk">
+        </div>
+        <div class="modal-body">
+          <textarea id="editContent" class="form-control mb-3" rows="6" readonly></textarea>
+          <label for="editStatus"><strong>Update Status:</strong></label>
+          <select id="editStatus" class="form-select" name="status" onchange="toggleRejectionReason()">
+            <option value="Pending">Pending</option>
+            <option value="Accepted">Accepted</option>
+            <option value="Rejected">Rejected</option>
+          </select>
+          <div id="rejectionReasonContainer" class="mt-3" style="display: none;">
+            <label><strong>Reasons for Rejection</strong></label>
+            <div class="form-check"><input type="checkbox" class="form-check-input" id="reason1"><label class="form-check-label" for="reason1">Inappropriate content</label></div>
+            <div class="form-check"><input type="checkbox" class="form-check-input" id="reason2"><label class="form-check-label" for="reason2">Does not flow with previous part</label></div>
+            <div class="form-check"><input type="checkbox" class="form-check-input" id="reason3"><label class="form-check-label" for="reason3">Does not fit purpose of section</label></div>
+            <div class="form-check"><input type="checkbox" class="form-check-input" id="reason4"><label class="form-check-label" for="reason4">Sudden plot changes</label></div>
+            <input type="text" class="form-control mt-2" placeholder="Other (optional)">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Update</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
 
-            document.getElementById("genreInput").value = "";
-        }
-
-        function deleteSelectedGenres() {
-            let genreList = document.getElementById("genreList");
-            let checkboxes = genreList.querySelectorAll("input[type='checkbox']:checked");
-
-            if (checkboxes.length === 0) {
-                alert("Please select at least one genre to delete.");
-                return;
-            }
-
-            checkboxes.forEach(checkbox => {
-                let parentLi = checkbox.parentElement;
-                parentLi.remove();
-            });
-        }
-
-        function getRandomColor() {
-            let letters = '0123456789ABCDEF';
-            let color = '#';
-            for (let i = 0; i < 6; i++) {
-                color += letters[Math.floor(Math.random() * 16)];
-            }
-            return color;
-        }
-    </script>
-
+<script>
+  let pending_stage_pk_list = {{ pending_stage_pk_list | safe }};
+  let pending_stage_text_list = {{ pending_stage_text_list | safe }};
+  function openEditModal(title, genre, pk) {
+    for (let i = 0; i < pending_stage_pk_list.length; i++) {
+      if (pk == pending_stage_pk_list[i]) {
+        $("#editContent").val(pending_stage_text_list[i]);
+        break;
+      }
+    }
+    $("#editModalPk").val(pk);
+    $("#editModalLabel").text(title);
+    $("#editModalGenre").text(genre);
+    $("#editStatus").val("Pending");
+    toggleRejectionReason();
+  }
+  function toggleRejectionReason() {
+    const status = $("#editStatus").val();
+    if (status === "Rejected") {
+      $("#rejectionReasonContainer").slideDown();
+    } else {
+      $("#rejectionReasonContainer").slideUp();
+    }
+  }
+</script>
 {% endblock %}

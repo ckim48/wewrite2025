@@ -160,22 +160,49 @@
 </div>
 
 
-  {% for stage in curr_story_stages %}
+
   <div class="story-part-card">
-    <div class="part-label">
-      {% if stage.part == 1 %} Exposition
-      {% elif stage.part == 2 %} Rising Action
-      {% elif stage.part == 3 %} Climax
-      {% elif stage.part == 4 %} Falling Action
-      {% elif stage.part == 5 %} Resolution
-      {% endif %}
+    <div class="Full Story">
+      <div class="story-text">
+        {% for stage in curr_story_stages %}
+          {{ stage.text }}
+        {% endfor %}
+      </div>
     </div>
-    <div class="story-text">{{ stage.text }}</div>
   </div>
-  {% endfor %}
+
 
 
 </div>
+<div class="container">
+  <div class="comment-section">
+    <h4 class="fw-bold mb-3">Comments</h4>
+    <form method="post" action="">
+      {% csrf_token %}
+      <textarea name="comment_text" class="comment-box" rows="3" placeholder="Leave a comment..."></textarea>
+      <button type="submit" class="comment-btn">Submit</button>
+    </form>
 
+<ul class="comment-list">
+  {% for comment in comments %}
+    <li class="position-relative">
+      {% if comment.user == request.user or isAdmin %}
+        <form method="post" action="{% url 'delete-comment' comment.id %}" style="position: absolute; top: 8px; right: 10px;">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-2">✕</button>
+        </form>
+      {% endif %}
+      <strong>{{ comment.user.username }}</strong><br>
+      {{ comment.text }}<br>
+      <small class="text-muted">{{ comment.created_at|date:"M d, Y H:i" }}</small>
+    </li>
+  {% empty %}
+    <li>No comments yet.</li>
+  {% endfor %}
+</ul>
+
+  </div>
+
+</div>
 
 {% endblock %}
