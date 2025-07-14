@@ -46,10 +46,11 @@
 
       <nav id="navbar" class="navbar">
         <ul>
+          {% if isLogin %}
           <li><a class="nav-link scrollto" href="{% url 'to-read' %}">Read</a></li>
 
           <li><a class="nav-link scrollto" href="{% url 'to-main' %}">Write</a></li>
-
+          {% endif %}
           {% if isAdmin %}
           <li><a class="nav-link scrollto" href="{% url 'to-genremanagement' %}">Admin</a></li>
           {% endif %}
