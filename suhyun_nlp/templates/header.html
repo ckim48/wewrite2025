@@ -40,9 +40,12 @@
         <header id="header" class="fixed-top d-flex align-items-center">
     <div class="container d-flex justify-content-between">
 
-      <div class="logo">
-        <h1><a href="{% url 'to-index' %}">WeWrite</a></h1>
-      </div>
+<div class="logo">
+  <a href="{% url 'to-index' %}">
+    <img src="{% static 'img/logo.png' %}" alt="WeWrite Logo" style="height: 35px; margin-top:11px;">
+  </a>
+</div>
+
 
       <nav id="navbar" class="navbar">
         <ul>

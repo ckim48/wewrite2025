@@ -11,6 +11,17 @@ from story.models import *
 
 from member.models import *  # Importing CustomUser model from manager app
 
+from openai import OpenAI
+
+def translate_text_to_korean(text):
+    res = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": "Translate the following story to Korean:"},
+            {"role": "user", "content": text}
+        ]
+    )
+    return res.choices[0].message.content.strip()
 
 def to_index(request):
     is_login = request.user.is_authenticated
@@ -426,12 +437,14 @@ def to_detail(request, id):
 
     # Load all comments for the story
     comments = Comment.objects.filter(story=curr_story).order_by('-created_at')
-
+    full_text = "\n".join([stage.text for stage in curr_story_stages])
+    translated_korean = translate_text_to_korean(full_text)
     context = {
         'isAdmin': isAdmin,
         'username': username,
         'isLogin': True,
         'curr_story': curr_story,
+        'translated_korean': translated_korean,
         'curr_story_stages': curr_story_stages,
         'curr_story_authors': curr_story_authors,
         'comments': comments,
