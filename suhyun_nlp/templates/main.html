@@ -3,178 +3,124 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>WeWrite - User Posts</title>
-    <script src="https://unpkg.com/isotope-layout@3/dist/isotope.pkgd.min.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f8f9fa;
-        }
+  <meta charset="UTF-8">
+  <title>WeWrite - User Posts</title>
+  <script src="https://unpkg.com/isotope-layout@3/dist/isotope.pkgd.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f8f9fa;
+    }
 
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 50px;
-            margin-top: 70px;
-            flex-wrap: wrap;
-        }
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 70px 0 50px;
+      flex-wrap: wrap;
+    }
 
-.button-group .button {
-    padding: 10px 18px;
-    margin: 5px 8px 5px 0;
-    background: linear-gradient(145deg, #f0f0f0, #dcdcdc);
-    color: #333;
-    font-weight: 600;
-    border: 1px solid #ccc;
-    border-radius: 25px;
-    cursor: pointer;
-    box-shadow: 2px 2px 6px #bbb, -2px -2px 6px #fff;
-    transition: all 0.3s ease;
-}
-
-.button-group .button:hover {
-    background: #b0b0b0;
-    color: #fff;
-    box-shadow: 2px 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-.button-group .button.active {
-    background: #555;
-    color: white;
-    border-color: #444;
-    box-shadow: 2px 4px 12px rgba(0, 0, 0, 0.4);
-}
+    .post-card {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
 
 
-        .button, .fakebutton {
-            padding: 10px 15px;
-            background-color: #d2d2d2;
-            color: black;
-            border: none;
-            border-radius: 5px;
-            font-size: 14px;
-            cursor: pointer;
-            text-decoration: none;
-        }
+    .post-header {
+      margin-bottom: 10px;
+    }
 
-        .button:hover {
-            color: white;
-            background-color:#bcbcbc;
-        }
+    .post-title-container {
+      display: flex;
+      flex-direction: column;
+    }
 
-        .fakebutton {
-            background-color: #cccccc;
-            cursor: default;
-        }
+    .post-title {
+      font-weight: bold;
+      font-size: 18px;
+      color: #4b4b4b;
+      margin-bottom: 2px;
+      word-wrap: break-word;
+    }
 
-        .button.active {
-            background-color: #0056b3;
-        }
+    .post-date {
+      font-size: 13px;
+      color: #999;
+    }
 
-        .post-card {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            margin-bottom: 30px;
-            position: relative;
-            width: 100%;
-        }
+    .post-content {
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 12px;
+      word-wrap: break-word;
+      flex-grow: 1;
+    }
 
-        .post-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
+    .category {
+      font-size: 13px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 5px;
+      display: inline-block;
+      background-color: #e9ecef;
+      color: #333;
+      margin-top: auto;
+    }
 
-        .post-title-container {
-            display: flex;
-            align-items: center;
-        }
+    .genre {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background-color: #fff;
+      font-size: 11px;
+      font-weight: bold;
+      padding: 4px 10px;
+      border-radius: 5px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+      z-index: 1;
+      color: #666;
+      text-transform: capitalize;
+    }
 
-        .post-title {
-            font-weight: bold;
-            font-size: 18px;
-            color: #4b4b4b;
-            margin-right: 10px;
-        }
+    .science-fiction { color: #4caf50; }
+    .fantasy { color: #673ab7; }
+    .fiction { color: #ff9800; }
 
-        .post-date {
-            font-size: 14px;
-            color: #888;
-        }
+    .floating-write-btn {
+      position: fixed;
+      bottom: 25px;
+      right: 25px;
+      background: #6c63ff;
+      color: white;
+      padding: 14px;
+      border-radius: 50%;
+      font-size: 20px;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+      text-align: center;
+      transition: background 0.3s ease;
+      z-index: 1000;
+    }
 
-        .post-content {
-            font-size: 14px;
-            color: #555;
-            margin-bottom: 10px;
-        }
-
-        .category {
-            font-size: 14px;
-            font-weight: bold;
-            padding: 5px 10px;
-            border-radius: 5px;
-            display: inline-block;
-            position: absolute;
-            top: 50%;
-            right: 20px;
-            transform: translateY(-50%);
-        }
-
-        .genre {
-            position: absolute;
-            top: -10px;
-            right: 20px;
-            background-color: white;
-            font-size: 12px;
-            font-weight: bold;
-            padding: 5px 10px;
-            border-radius: 5px;
-            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2), 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .rising-action, .resolution, .climax {
-            color: darkgray;
-        }
-
-        .science-fiction { background-color: white; color: #4caf50; }
-        .fantasy { background-color: white; color: #673ab7; }
-        .fiction { background-color: white; color: #ff9800; }
-        .floating-write-btn {
-  position: fixed;
-  bottom: 25px;
-  right: 25px;
-  background: #6c63ff;
-  color: white;
-/*  padding: 14px 1px;*/
-            padding: 14px;
-  border-radius: 50%;
-  font-size: 20px;
-  box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-  text-align: center;
-  transition: background 0.3s ease;
-  z-index: 1000;
-}
-
-.floating-write-btn:hover {
-  background: #4a43d6;
-  color: #fff;
-  text-decoration: none;
-}
-
-    </style>
+    .floating-write-btn:hover {
+      background: #4a43d6;
+      color: #fff;
+      text-decoration: none;
+    }
+  </style>
 </head>
 <body>
 
 <div class="top-bar d-flex justify-content-between align-items-center flex-wrap">
-  <!-- Search bar on the left -->
-  <div class="search-container d-flex align-items-center px-3 py-1 mb-3" style="border: 1.5px solid #ccc; border-radius: 10px; height: 42px; max-width: 600px; flex-grow: 1;">
+  <div class="search-container d-flex align-items-center px-3 py-1 mb-3"
+       style="border: 1.5px solid #ccc; border-radius: 10px; height: 42px; max-width: 600px; flex-grow: 1;">
     <i class="bi bi-search me-2" style="font-size: 1rem; color: #666;"></i>
     <input type="text" id="boardSearchInput" class="form-control border-0 shadow-none bg-transparent p-0 ps-1"
            placeholder="Search story titles..." style="font-size: 0.95rem; line-height: 1.2rem; height: 100%;">
@@ -184,60 +130,42 @@
       </button>
       <ul class="dropdown-menu dropdown-menu-end" id="boardGenreDropdownMenu">
         <li><a class="dropdown-item active" href="#" data-filter="*">All</a></li>
-        <li><a class="dropdown-item" href="#" data-filter=".science-fiction">Science Fiction</a></li>
-        <li><a class="dropdown-item" href="#" data-filter=".historical-fiction">Historical Fiction</a></li>
-        <li><a class="dropdown-item" href="#" data-filter=".fantasy">Fantasy</a></li>
-        <li><a class="dropdown-item" href="#" data-filter=".fiction">Fiction</a></li>
-        <li><a class="dropdown-item" href="#" data-filter=".mistery">Mistery</a></li>
-        <li><a class="dropdown-item" href="#" data-filter=".romance">Romance</a></li>
+        {% for g in all_genres %}
+        <li><a class="dropdown-item" href="#" data-filter=".genre-{{ g.name|lower|cut:" " }}">{{ g.name }}</a></li>
+        {% endfor %}
       </ul>
     </div>
   </div>
 
-  <!-- Start New Story on the right -->
   <div class="mb-3 ms-3">
     {% if new_story_available %}
-      <a class="button" href="{% url 'to-write' %}">Start New Story</a>
+    <a class="button" href="{% url 'to-write' %}">Start New Story</a>
     {% else %}
-      <a class="fakebutton">Start New Story</a>
+    <a class="fakebutton">Start New Story</a>
     {% endif %}
   </div>
 </div>
 
+<div id="story-grid" class="row g-4">
+  {% for story, exposition, pk, genre, title, last_part in story_tuple_list %}
+  <div class="col-12 col-md-6 col-lg-4 grid-item genre-{{ genre.name|lower|cut:' ' }} d-flex">
+    <a href="{% url 'to-collaborate' pk %}" class="w-100 text-decoration-none">
+      <div class="post-card">
+        <span class="genre {{ genre.name|slugify }}">{{ genre.name | title }}</span>
+        <div class="post-header">
+          <div class="post-title-container">
+            <span class="post-title">{{ title | title }}</span>
+            <span class="post-date">{{ story.started_date }}</span>
+          </div>
+        </div>
+        <div class="post-content">{{ exposition | title }}</div>
+        <span class="category" style="margin-top:58px;">{{ last_part | title }}</span>
+      </div>
+    </a>
+  </div>
+  {% endfor %}
+</div>
 
-    <div id="story-grid">
-        {% for story, exposition, pk, genre, title, last_part in story_tuple_list %}
-        <a href="{% url 'to-collaborate' pk %}" style="text-decoration:none;">
-            <div class="post-card {{ genre.name|slugify }}">
-                {% if genre.name == 'fiction' %}
-                    <span class="genre fiction">{{ genre.name | title }}</span>
-                {% elif genre.name == 'science fiction' %}
-                    <span class="genre science-fiction">{{ genre.name | title}}</span>
-                {% elif genre.name == 'fantasy' %}
-                    <span class="genre fantasy">{{ genre.name | title}}</span>
-                {% elif genre.name == 'historical fiction' %}
-                    <span class="genre historical-fiction">{{ genre.name | title}}</span>
-                {% elif genre.name == 'mistery' %}
-                    <span class="genre mistery">{{ genre.name | title}}</span>
-                {% elif genre.name == 'romance' %}
-                    <span class="genre romance">{{ genre.name | title}}</span>
-                {% else %}
-                    <span class="genre">{{ genre.name | title}}</span>
-                {% endif %}
-                <div class="post-header">
-                    <div class="post-title-container">
-                        <span class="post-title">{{ title | title}}</span>
-                        <span class="post-date">{{ story.started_date }}</span>
-                    </div>
-                </div>
-                <div class="post-content">
-                    {{ exposition | title}}
-                </div>
-                <span class="category">{{ last_part | title}}</span>
-            </div>
-        </a>
-        {% endfor %}
-    </div>
 {% if new_story_available %}
 <a href="{% url 'to-write' %}" class="floating-write-btn" title="Start New Story">
   <i class="bi bi-pencil-square"></i>
@@ -247,31 +175,25 @@
 <script>
 document.addEventListener("DOMContentLoaded", function () {
   const iso = new Isotope("#story-grid", {
-    itemSelector: ".post-card",
+    itemSelector: ".grid-item",
     layoutMode: "masonry"
   });
 
-  // Genre filtering
   document.querySelectorAll('#boardGenreDropdownMenu a').forEach(item => {
     item.addEventListener('click', function (e) {
       e.preventDefault();
       document.querySelector('#boardGenreDropdownMenu .active')?.classList.remove('active');
       this.classList.add('active');
       document.getElementById('boardGenreDropdown').innerHTML = `<i class="bi bi-sliders" style="font-size: 1rem; color: #666;"></i>`;
-
       const filterValue = this.getAttribute("data-filter");
       iso.arrange({ filter: filterValue });
-
-      // trigger search again
       document.getElementById("boardSearchInput").dispatchEvent(new Event("input"));
     });
   });
 
-  // Search input logic
   document.getElementById("boardSearchInput").addEventListener("input", function () {
     const searchTerm = this.value.toLowerCase();
     const genreFilter = document.querySelector("#boardGenreDropdownMenu .active").getAttribute("data-filter");
-
     iso.arrange({
       filter: function (itemElem) {
         const title = itemElem.querySelector(".post-title")?.innerText.toLowerCase();

@@ -76,41 +76,6 @@
   cursor: pointer;
 }
 
-@media (max-width: 991px) {
-  #header .navbar {
-    position: absolute;
-    top: 70px;
-    left: 0;
-    right: 0;
-    background: rgba(255, 255, 255, 0.95);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    z-index: 9999;
-    display: none;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  #header .navbar ul {
-    flex-direction: column;
-    margin: 0;
-  }
-
-  #header .navbar a {
-    padding: 10px;
-    text-align: center;
-    width: 100%;
-  }
-
-  #header .navbar .mobile-nav-toggle {
-    display: block;
-    margin-left: auto;
-  }
-
-  #header .navbar.active {
-    display: flex;
-  }
-}
-
 #hero .btn-primary {
   background-color: #3498db;
   border: none;

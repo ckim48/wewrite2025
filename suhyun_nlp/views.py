@@ -252,7 +252,8 @@ def to_main(request):
     story_title_list = [story.title for story in story_list]
 
 
-
+    all_genres = Genre.objects.all().order_by('pk')
+    all_genres_pk_list = [genre.pk for genre in all_genres]
 
     story_tuple_list = [] # (story , exposition, pk, genre, title)
     for i in range(len(story_list)):
@@ -269,6 +270,7 @@ def to_main(request):
         'story_title_list': story_title_list,
         'story_tuple_list': story_tuple_list,
         'new_story_available': new_story_available,
+        'all_genres': all_genres
     }
     return render(request, 'main.html', context)
 @login_required
@@ -464,6 +466,53 @@ def delete_comment(request, comment_id):
 
     return redirect('to-detail', id=comment.story.id)
 
+
+from django.http import HttpResponse
+from django.utils.text import slugify
+
+
+@login_required
+def download_text(request, id):
+    story = get_object_or_404(Story, pk=id)
+    lang = request.GET.get("lang", "en")
+    if lang == "ko":
+        # Use GPT-translated Korean version
+        full_text = translate_text_to_korean("\n".join([s.text for s in Stage.objects.filter(story=story).order_by('part')]))
+    else:
+        full_text = f"{story.title}\n\n"
+        for stage in Stage.objects.filter(story=story).order_by('part'):
+            full_text += f"--- Part {stage.part} ---\n{stage.text}\n\n"
+
+    filename = f"{slugify(story.title)}_{lang}.txt"
+    response = HttpResponse(full_text, content_type='text/plain')
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    return response
+
+from gtts import gTTS
+from django.http import FileResponse
+import tempfile
+
+@login_required
+def download_audio(request, id):
+    story = get_object_or_404(Story, pk=id)
+    lang = request.GET.get("lang", "en")
+
+    if lang == "ko":
+        text = translate_text_to_korean("\n".join([s.text for s in Stage.objects.filter(story=story).order_by('part')]))
+        lang_code = "ko"
+    else:
+        text = f"{story.title}\n\n" + "\n".join([s.text for s in Stage.objects.filter(story=story).order_by('part')])
+        lang_code = "en"
+
+    tts = gTTS(text=text, lang=lang_code)
+    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
+    tts.save(temp_file.name)
+
+    filename = f"{slugify(story.title)}_{lang}.mp3"
+    return FileResponse(open(temp_file.name, 'rb'), as_attachment=True, filename=filename)
+
+
+
 @login_required
 def to_collaborate(request, id):
     curr_user = request.user
@@ -482,6 +531,7 @@ def to_collaborate(request, id):
         'curr_story': curr_story,
         'curr_story_stages': curr_story_stages,
         'pk': curr_story.pk,
+        'isLogin': True,
         'curr_part': curr_part,  # ✅ Add this
     }
 

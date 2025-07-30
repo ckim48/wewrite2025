@@ -38,4 +38,6 @@ urlpatterns = [
     path('delete_story/<int:pk>/', views.to_delete_story, name='delete_story'),
     path('detail/<int:id>/', views.to_detail, name='to-detail'),
     path('delete-comment/<int:comment_id>/', views.delete_comment, name='delete-comment'),
+    path('download/text/<int:id>/', views.download_text, name='download-text'),
+    path('download/audio/<int:id>/', views.download_audio, name='download-audio'),
 ]
