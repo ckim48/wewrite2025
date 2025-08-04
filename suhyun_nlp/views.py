@@ -441,6 +441,14 @@ def to_detail(request, id):
     comments = Comment.objects.filter(story=curr_story).order_by('-created_at')
     full_text = "\n".join([stage.text for stage in curr_story_stages])
     translated_korean = translate_text_to_korean(full_text)
+    # Assume this is a string from the DB: "alice@example.com, bob@example.com"
+    # Assume this is a string from the DB: "alice@example.com, bob@example.com"
+
+    # Extract only the username part (before "@")
+    authors = [email.split('@')[0].strip() for email in curr_story_authors.split(',') if email.strip()]
+    authors = ",".join(authors)
+
+
     context = {
         'isAdmin': isAdmin,
         'username': username,
@@ -448,7 +456,7 @@ def to_detail(request, id):
         'curr_story': curr_story,
         'translated_korean': translated_korean,
         'curr_story_stages': curr_story_stages,
-        'curr_story_authors': curr_story_authors,
+        'curr_story_authors': authors,
         'comments': comments,
     }
 
@@ -695,17 +703,14 @@ def to_add_genre(request):
     username = curr_user.username
 
     if request.method == 'POST':
-        curr_user = request.user
-
         name = request.POST.get('name').title()
-        genre_delete_check = request.POST.get('genre_delete_check')
-        print(genre_delete_check)
-        # TODO: Genre에 이미지 저장할 필드 생성하고 추가할 수 있게 바꿔야함
+        image = request.FILES.get('image')  # ⬅️ Get uploaded image
+
         new_genre = Genre(
             name=name,
+            image=image,
         )
         new_genre.save()
-
         return redirect('to-genremanagement')
 
     context = {
@@ -715,6 +720,7 @@ def to_add_genre(request):
     }
 
     return render(request, 'genre_management.html', context)
+
 
 @login_required
 def to_delete_genre(request):

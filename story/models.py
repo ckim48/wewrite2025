@@ -5,8 +5,10 @@ from member.models import *
 
 
 class Genre(models.Model):
-    name = models.TextField(max_length=250, null=False)
+    name = models.CharField(max_length=50, unique=True)
     is_active = models.BooleanField(default=True)
+    image = models.ImageField(upload_to='genre_images/', null=True, blank=True)  # Add this line
+
 
     def __str__(self):
         return self.name

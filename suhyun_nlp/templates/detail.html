@@ -155,50 +155,54 @@
   <div class="text-center">
     <span class="genre-badge">{{ curr_story.genre.name }}</span>
   </div>
-<div class="d-flex flex-column justify-content-between align-items-end gap-3 mt-3 mb-5" style="height: 70px;">
-  <!-- TTS Button (Top) -->
-  <button id="tts-toggle-btn" class="btn btn-outline-primary d-flex align-items-center gap-2">
-    <i id="tts-icon" class="bi bi-volume-up"></i>
-    <span id="tts-text">Listen</span>
-  </button>
+<div class="meta-card mt-4 p-4 rounded shadow-sm d-flex flex-column flex-md-row justify-content-between align-items-start gap-4" style="background: rgba(250, 250, 250, 0.95); border: 1px solid #e3e6ea;">
 
-  <!-- EN/KOR Toggle (Bottom) -->
-  <div class="d-flex align-items-center gap-2">
-    <span class="fw-bold small" id="lang-label">EN</span>
-    <div class="form-switch">
-      <input class="form-check-input" type="checkbox" id="translationToggle" style="width: 50px; height: 24px;">
+  <!-- Left: Metadata -->
+  <div class="d-flex flex-column gap-2">
+    <div class="meta-item">
+      <div class="small text-muted mb-1">Main Character</div>
+      <div class="fw-semibold fs-6 text-dark">{{ curr_story.main_character }}</div>
     </div>
-    <span class="fw-bold small">KOR</span>
+    <div class="meta-item">
+      <div class="small text-muted mb-1">Time Setting</div>
+      <div class="fw-semibold fs-6 text-dark">{{ curr_story.time_setting }}</div>
+    </div>
+    <div class="meta-item">
+      <div class="small text-muted mb-1">Author(s)</div>
+      <div class="fw-semibold fs-6 text-dark">
+        {{ curr_story_authors|striptags|linebreaksbr }}
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: Buttons Section (fully right-aligned, stacked) -->
+  <div class="d-flex flex-column align-items-end gap-2 ms-auto">
+        <div class="d-flex align-items-center gap-2">
+      <span class="fw-bold small">EN</span>
+      <div class="form-switch">
+        <input class="form-check-input" type="checkbox" id="translationToggle" style="width: 50px; height: 24px;">
+      </div>
+      <span class="fw-bold small">KOR</span>
+    </div>
+
+    <button id="tts-toggle-btn" class="btn btn-outline-primary d-flex align-items-center gap-2">
+      <i id="tts-icon" class="bi bi-volume-up"></i>
+<!--      <span id="tts-text">Listen</span>-->
+    </button>
+
+
+
+    <a href="{% url 'download-text' curr_story.id %}?lang=en" class="btn btn-outline-primary w-100" id="download-text-btn">
+      <i class="bi bi-file-earmark-text"></i> Download
+    </a>
+
+    <a href="{% url 'download-audio' curr_story.id %}?lang=en" class="btn btn-outline-warning w-100" id="download-audio-btn">
+      <i class="bi bi-file-earmark-music"></i> Download
+    </a>
   </div>
 </div>
 
-<div class="d-flex justify-content-end gap-2 mt-4">
-  <!-- English -->
-  <a href="{% url 'download-text' curr_story.id %}?lang=en" class="btn btn-outline-primary" id="download-text-btn">
-    <i class="bi bi-file-earmark-text"></i> Download Text (EN)
-  </a>
-  <a href="{% url 'download-audio' curr_story.id %}?lang=en" class="btn btn-outline-warning" id="download-audio-btn">
-    <i class="bi bi-file-earmark-music"></i> Download Audio (EN)
-  </a>
-</div>
-
-
-
-
-<div class="meta-card mt-4 p-4 rounded shadow-sm d-flex flex-column flex-md-row justify-content-between align-items-start gap-4" style="background: rgba(250, 250, 250, 0.9); border: 1px solid #e3e6ea;">
-  <div class="meta-item">
-    <div class="small text-muted mb-1">Main Character</div>
-    <div class="fw-semibold fs-6 text-dark">{{ curr_story.main_character }}</div>
-  </div>
-  <div class="meta-item">
-    <div class="small text-muted mb-1">Time Setting</div>
-    <div class="fw-semibold fs-6 text-dark">{{ curr_story.time_setting }}</div>
-  </div>
-  <div class="meta-item">
-    <div class="small text-muted mb-1">Author(s)</div>
-    <div class="fw-semibold fs-6 text-dark" style="max-width: 250px; word-wrap: break-word;">{{ curr_story_authors }}</div>
-  </div>
-</div>
 
 
 
@@ -337,14 +341,14 @@
     const baseUrl = "{{ curr_story.id }}";
     if (isKorean) {
       downloadTextBtn.href = `/download/text/${baseUrl}/?lang=ko`;
-      downloadTextBtn.innerHTML = `<i class="bi bi-file-earmark-text"></i> Download Text (KR)`;
+      downloadTextBtn.innerHTML = `<i class="bi bi-file-earmark-text"></i> Download (KR)`;
       downloadAudioBtn.href = `/download/audio/${baseUrl}/?lang=ko`;
-      downloadAudioBtn.innerHTML = `<i class="bi bi-file-earmark-music"></i> Download Audio (KR)`;
+      downloadAudioBtn.innerHTML = `<i class="bi bi-music-note-beamed"></i> Download (KR)`;
     } else {
       downloadTextBtn.href = `/download/text/${baseUrl}/?lang=en`;
-      downloadTextBtn.innerHTML = `<i class="bi bi-file-earmark-text"></i> Download Text (EN)`;
+      downloadTextBtn.innerHTML = `<i class="bi bi-file-earmark-text"></i> Download (EN)`;
       downloadAudioBtn.href = `/download/audio/${baseUrl}/?lang=en`;
-      downloadAudioBtn.innerHTML = `<i class="bi bi-file-earmark-music"></i> Download Audio (EN)`;
+      downloadAudioBtn.innerHTML = `<i class="bi bi-music-note-beamed"></i> Download (EN)`;
     }
   }
 
