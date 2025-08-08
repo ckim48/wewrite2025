@@ -13,6 +13,14 @@
       padding: 20px;
       background-color: #f8f9fa;
     }
+.dropdown-menu {
+  position: absolute !important;
+  top: 100%; /* right below the button */
+  left: auto;
+  right: 0;
+  transform: none !important; /* prevent Bootstrap from using popper placement */
+  z-index: 1050;
+}
 
     .top-bar {
       display: flex;
@@ -20,6 +28,8 @@
       align-items: center;
       margin: 70px 0 50px;
       flex-wrap: wrap;
+      z-index: 10000;
+  overflow: visible !important;
     }
 
     .post-card {
@@ -137,13 +147,7 @@
     </div>
   </div>
 
-  <div class="mb-3 ms-3">
-    {% if new_story_available %}
-    <a class="button" href="{% url 'to-write' %}">Start New Story</a>
-    {% else %}
-    <a class="fakebutton">Start New Story</a>
-    {% endif %}
-  </div>
+
 </div>
 
 <div id="story-grid" class="row g-4">

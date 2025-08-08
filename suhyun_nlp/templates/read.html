@@ -120,28 +120,10 @@
 
 <div class="container supermt-5">
 
-  <!-- Recommendations -->
-  <h4 class="mt-3">Recommended for You</h4>
-  <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4">
-    {% for story, author, pk, genre, title, genre_slug in recommended_story_tuple_list %}
-    <div class="col">
-      <a href="/detail/{{ pk }}/">
-        <div class="genre-card"
-          style="background-image: url('../static/img/{{ genre_slug | lower }}.png');
-                 background-size: cover; background-position: center;">
-          <div class="card-title">{{ title|title }}</div>
-          <div class="card-author">by {{ author }}</div>
-          <div class="card-genre genre-{{ genre_slug }}">{{ genre.name }}</div>
-          <div class="card-date">{{ story.started_date|date:"M d, Y" }}</div>
-        </div>
-      </a>
-    </div>
-    {% endfor %}
-  </div>
+
 
   <!-- Read Now -->
 <!-- Read Now -->
-<h4 class="mt-5">Read Now</h4>
 <div class="d-flex align-items-center justify-content-center mb-4">
 <div class="search-container d-flex align-items-center px-2 py-1" style="width: 100%; max-width: 600px; border: 1.5px solid #ccc; border-radius: 10px; height: 42px;">
     <i class="bi bi-search me-2"></i>
@@ -164,6 +146,7 @@
 </div>
 
 
+<h4 class="mt-5">Read Now</h4>
 
 
 
@@ -186,6 +169,24 @@
           <div class="card-date">{{ story.started_date|date:"M d, Y" }}</div>
         </a>
       </div>
+    </div>
+    {% endfor %}
+  </div>
+    <!-- Recommendations -->
+  <h4 class="mt-3">Recommended for You</h4>
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4">
+    {% for story, author, pk, genre, title, genre_slug in recommended_story_tuple_list %}
+    <div class="col">
+      <a href="/detail/{{ pk }}/">
+        <div class="genre-card"
+          style="background-image: url('../static/img/{{ genre_slug | lower }}.png');
+                 background-size: cover; background-position: center;">
+          <div class="card-title">{{ title|title }}</div>
+          <div class="card-author">by {{ author }}</div>
+          <div class="card-genre genre-{{ genre_slug }}">{{ genre.name }}</div>
+          <div class="card-date">{{ story.started_date|date:"M d, Y" }}</div>
+        </div>
+      </a>
     </div>
     {% endfor %}
   </div>
