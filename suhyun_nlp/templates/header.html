@@ -4,74 +4,80 @@
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <meta property="og:image" content="../static/img/my.png">
+  <meta property="og:image" content="../static/img/my.png">
 
   <title>NLCS WeWrite</title>
   <meta content="" name="description">
   <meta content="" name="keywords">
 
   {% load static %}
-  <!-- Favicons -->
   <link href="{% static 'img/favicon.png' %}" rel="icon">
   <link href="{% static 'img/apple-touch-icon.png' %}" rel="apple-touch-icon">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
   <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Raleway:300,300i,400,400i,500,500i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700|Raleway:300,400,500,700|Poppins:300,400,500,700" rel="stylesheet">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;700&family=Nanum+Myeongjo:wght@400;700;800&display=swap" rel="stylesheet">
 
-  <!-- Vendor CSS Files -->
+  <!-- Vendor CSS -->
   <link href="{% static 'vendor/aos/aos.css' %}" rel="stylesheet">
-<!-- Bootstrap CSS -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="{% static 'vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
   <link href="{% static 'vendor/boxicons/css/boxicons.min.css' %}" rel="stylesheet">
   <link href="{% static 'vendor/glightbox/css/glightbox.min.css' %}" rel="stylesheet">
 
-  <!-- Template Main CSS File -->
+  <!-- Main CSS -->
   <link href="{% static 'css/styles.css' %}" rel="stylesheet">
-<style>
-html, body {
-  overflow-x: hidden !important;
-}
 
-</style>
+  <style>
+    html, body {
+      overflow-x: hidden !important;
+    }
 
+    .navbar-nav .nav-link.active {
+      color: #6c63ff !important;
+      font-weight: 600;
+    }
+
+    .navbar-nav .nav-link {
+      padding: 8px 12px;
+      transition: all 0.2s ease-in-out;
+    }
+
+    .navbar-nav .nav-link:hover {
+      color: #4a43d6 !important;
+    }
+  </style>
 </head>
 
-
-
-<body>
+<body class="page-{{ request.resolver_match.url_name }}">
 
 <header id="header" class="fixed-top">
   <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
     <div class="container">
-
-      <!-- Logo -->
       <a class="navbar-brand" href="{% url 'to-index' %}">
         <img src="{% static 'img/logo.png' %}" alt="WeWrite Logo" style="height: 35px;">
       </a>
 
-      <!-- Toggler -->
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
 
-      <!-- Navbar Links -->
       <div class="collapse navbar-collapse" id="mainNavbar">
         <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
           {% if isLogin %}
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'to-read' %}">Read</a>
+            <a class="nav-link {% if request.resolver_match.url_name == 'to-read' %}active{% endif %}" href="{% url 'to-read' %}">Read</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'to-main' %}">Write</a>
+            <a class="nav-link {% if request.resolver_match.url_name == 'to-main' %}active{% endif %}" href="{% url 'to-main' %}">Write</a>
           </li>
           {% endif %}
           {% if isAdmin %}
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'to-genremanagement' %}">Admin</a>
+            <a class="nav-link {% if request.resolver_match.url_name == 'to-genremanagement' %}active{% endif %}" href="{% url 'to-genremanagement' %}">Admin</a>
           </li>
           {% endif %}
           {% if isLogin %}
@@ -80,7 +86,7 @@ html, body {
           </li>
           {% else %}
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'to-login' %}">Login</a>
+            <a class="nav-link {% if request.resolver_match.url_name == 'to-login' %}active{% endif %}" href="{% url 'to-login' %}">Login</a>
           </li>
           {% endif %}
         </ul>
@@ -89,32 +95,24 @@ html, body {
   </nav>
 </header>
 
-{% block index %}
-{% endblock %}
+<!-- Dynamic content blocks -->
+{% block index %}{% endblock %}
+{% block login %}{% endblock %}
+{% block signup %}{% endblock %}
+{% block write %}{% endblock %}
+{% block read %}{% endblock %}
+{% block board %}{% endblock %}
 
-{% block login %}
-{% endblock %}
-
-{% block signup %}
-{% endblock %}
-
-{% block write %}
-{% endblock %}
-
-{% block read %}
-{% endblock %}
-
-{% block board %}
-{% endblock %}
-  <!-- Vendor JS Files -->
-  <script src="{% static 'vendor/aos/aos.js' %}"></script>
+<!-- Vendor JS -->
+<script src="{% static 'vendor/aos/aos.js' %}"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="{% static 'vendor/glightbox/js/glightbox.min.js' %}"></script>
-  <script src="{% static 'vendor/isotope-layout/isotope.pkgd.min.js' %}"></script>
-  <script src="{% static 'vendor/swiper/swiper-bundle.min.js' %}"></script>
-  <script src="{% static 'vendor/php-email-form/validate.js' %}"></script>
-  <!-- Template Main JS File -->
-  <script src="{% static 'js/main.js' %}"></script>
+<script src="{% static 'vendor/glightbox/js/glightbox.min.js' %}"></script>
+<script src="{% static 'vendor/isotope-layout/isotope.pkgd.min.js' %}"></script>
+<script src="{% static 'vendor/swiper/swiper-bundle.min.js' %}"></script>
+<script src="{% static 'vendor/php-email-form/validate.js' %}"></script>
+
+<!-- Main JS -->
+<script src="{% static 'js/main.js' %}"></script>
 
 </body>
 </html>

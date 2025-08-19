@@ -1,119 +1,70 @@
 {% extends 'header.html' %}
 {% block write %}
   <style>
-    body {
-      background: #f8f9fc;
-      font-family: 'Inter', sans-serif;
-      margin: 0;
-      padding: 0;
-      color: #333;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+    /* Page shell */
+    body{
+      background:#f7f8fb;
+      font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      margin:0;color:#222;
+      min-height:100vh;display:flex;justify-content:center;align-items:flex-start;
+    }
+    .write-wrapper{width:100%;max-width:880px;padding:20px;margin-top:96px;}
+    .write-container{
+      background:#fff;border:1px solid #eef0f4;border-radius:16px;
+      box-shadow:0 8px 24px rgba(0,0,0,.06);padding:28px 28px 32px;
     }
 
-    .write-wrapper {
-      width: 100%;
-      max-width: 900px;
-      padding: 20px;
-      margin-top: 300px;
+    /* Headings */
+    h1{font-size:28px;line-height:1.2;margin:0;color:#111;font-weight:700;}
+    .sub{margin:.4rem 0 20px;color:#6b7280;font-size:14px;}
+
+    /* Form controls */
+    .form-group{margin:18px 0 20px;}
+    .form-label{display:block;font-weight:600;margin-bottom:8px;color:#111;}
+    .hint{color:#6b7280;font-size:12px;margin-top:6px;}
+
+    .field{
+      width:100%;padding:12px 14px;border:1px solid #e5e7eb;border-radius:10px;
+      background:#fff;font-size:14px;transition:border-color .15s ease, box-shadow .15s ease;
+    }
+    .field:focus{outline:none;border-color:#3c3f58;box-shadow:0 0 0 3px rgba(60,63,88,.15);}
+    textarea.field{resize:vertical;min-height:110px;}
+
+    /* --- Genre: simple, clean, single-select --- */
+    .genre-grid{
+      display:grid;gap:10px;
+      grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
+    }
+    .genre-radio{display:none;}
+    .genre-pill{
+      display:flex;align-items:center;justify-content:center;
+      height:40px;border-radius:999px;border:1px solid #e5e7eb;background:#fafbfc;
+      font-size:13px;font-weight:600;color:#374151;cursor:pointer;
+      transition:transform .12s ease, box-shadow .12s ease, background .12s ease, border-color .12s ease;
+      user-select:none; outline: none;
+    }
+    .genre-pill:hover{background:#f2f4f7;}
+    .genre-pill:focus-visible{box-shadow:0 0 0 3px rgba(60,63,88,.18);}
+
+    /* selected */
+    .genre-radio:checked + .genre-pill{
+      background:#3c3f58;color:#fff;border-color:#3c3f58;
+      box-shadow:0 6px 16px rgba(60,63,88,.25);
     }
 
-    .write-container {
-      background: #ffffff;
-      padding: 40px;
-      border-radius: 20px;
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.06);
-      width: 100%;
+    /* Submit */
+    .btn-primary{
+      appearance:none;border:0;border-radius:12px;background:#3c3f58;color:#fff;
+      padding:12px 16px;font-weight:700;font-size:15px;width:100%;
+      transition:filter .15s ease, transform .02s ease; cursor:pointer;
     }
+    .btn-primary:hover{filter:brightness(1.02);}
+    .btn-primary:active{transform:translateY(1px);}
 
-    h1 {
-      font-size: 34px;
-      font-weight: 700;
-      margin-bottom: 0;
-      color: #212529;
-    }
-
-    h2 {
-      font-size: 18px;
-      color: #6c757d;
-      margin-bottom: 25px;
-    }
-
-    .form-group {
-      margin-bottom: 24px;
-    }
-
-    label {
-      font-weight: 500;
-      display: block;
-      margin-bottom: 8px;
-      font-size: 16px;
-    }
-
-    input[type="text"], textarea {
-      width: 100%;
-      padding: 12px 16px;
-      border: 1px solid #ced4da;
-      border-radius: 12px;
-      font-size: 14px;
-      background: #fdfdfd;
-      transition: border-color 0.3s;
-    }
-
-    input[type="text"]:focus, textarea:focus {
-      border-color: #888;
-      outline: none;
-      background: #fff;
-    }
-
-    textarea {
-      resize: none;
-      height: 120px;
-    }
-
-    .checkbox-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .checkbox-grid input[type="checkbox"] {
-      display: none;
-    }
-
-    .checkbox-grid label {
-      padding: 10px 16px;
-      border: 1px solid #ddd;
-      border-radius: 20px;
-      font-size: 13px;
-      background: #f1f3f5;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .checkbox-grid input[type="checkbox"]:checked + label {
-      background-color: #3c3f58;
-      color: white;
-      border-color: #3c3f58;
-    }
-
-    button[type="submit"] {
-      background: #3c3f58;
-      color: #fff;
-      padding: 12px 20px;
-      border: none;
-      border-radius: 12px;
-      font-weight: 600;
-      font-size: 15px;
-      cursor: pointer;
-      transition: background 0.3s;
-      width: 100%;
-    }
-
-    button[type="submit"]:hover {
-      background: #2c2e44;
+    /* Loading overlay */
+    #loading-screen{
+      position:fixed;inset:0;display:none;background:rgba(255,255,255,.55);
+      z-index:9999;display:flex;align-items:center;justify-content:center;
     }
   </style>
 
@@ -121,66 +72,99 @@
     <div class="write-container">
       <form action="{% url 'to-write' %}" method="POST">
         {% csrf_token %}
-        <h1>WeWrite</h1>
-        <h2>Start a new story project</h2>
+        <h1>Start a new story</h1>
+        <p class="sub">Pick a genre, add your basics, and write your opening.</p>
 
+        <!-- Genre -->
         <div class="form-group">
-          <label>Genre</label>
-          <div class="checkbox-grid">
-            {% for genre_name in genre_name_list %}
-                <input type="checkbox" name="selected_genre[]" value="{{ genre_name }}" id="genre_{{ forloop.counter }}">
-                <label for="genre_{{ forloop.counter }}">{{ genre_name }}</label>
+          <label class="form-label">Genre</label>
+          <div class="genre-grid">
+            {% for g in genres %}
+              <input class="genre-radio" type="radio" name="selected_genre" value="{{ g.name }}" id="genre_{{ g.id }}">
+              <label class="genre-pill" for="genre_{{ g.id }}">{{ g.name }}</label>
+            {% empty %}
+              <span class="hint">No active genres available.</span>
             {% endfor %}
           </div>
+          <div class="hint">Choose one.</div>
         </div>
 
+        <!-- Title -->
         <div class="form-group">
-          <label for="title">Title</label>
-          <input type="text" id="title" name="title" placeholder="Enter a captivating title">
+          <label for="title" class="form-label">Title</label>
+          <input id="title" name="title" type="text" class="field" placeholder="Enter a captivating title" required>
         </div>
 
+        <!-- Main character -->
         <div class="form-group">
-          <label for="main-character">Main Character</label>
-          <input type="text" id="main-character" name="maincharacter" placeholder="e.g. Luna, the curious explorer">
+          <label for="main-character" class="form-label">Main character</label>
+          <input id="main-character" name="maincharacter" type="text" class="field" placeholder="e.g., Luna, the curious explorer">
         </div>
 
+        <!-- Time setting -->
         <div class="form-group">
-          <label for="time-setting">Time Setting</label>
-          <input type="text" id="time-setting" name="timesetting" placeholder="e.g. Year 3024, Ancient Korea">
+          <label for="time-setting" class="form-label">Time setting</label>
+          <input id="time-setting" name="timesetting" type="text" class="field" placeholder="e.g., Year 3024, Ancient Korea">
         </div>
 
+        <!-- Exposition -->
         <div class="form-group">
-          <label for="exposition">Exposition</label>
-          <textarea id="exposition" name="exposition" placeholder="Write the opening of your story here..."></textarea>
+          <label for="exposition" class="form-label">Exposition</label>
+          <textarea id="exposition" name="exposition" class="field" placeholder="Write the opening of your story here..."></textarea>
         </div>
 
-        <button type="submit">Submit Your Story</button>
+        <button type="submit" class="btn-primary">Submit your story</button>
       </form>
     </div>
   </div>
-  <div id="loading-screen" style="
-  position:fixed;
-  display: none;
-  top:0;
-  left:0;
-  width:100vw;
-  height:100vh;
-  background: rgba(255,255,255, 0.5);
-  z-index: 9999;
-  justify-content: center;
-  align-items:center;
-  ">
-    <div class="text-center">
-      <h3 style="font-size: 21px; color: #3c3f58;">Generating keywords and summary... Please Wait.</h3>
-      <div class="spinner-border text-secondary" role="status" style="width: 2.7rem; height: 2.7rem">
-        <span class="visually-hidden">Loading...</span>
+
+  <!-- Loading -->
+  <div id="loading-screen">
+    <div style="text-align:center">
+      <div style="font-size:16px;color:#3c3f58;margin-bottom:10px;">Generating keywords and summary…</div>
+      <div class="spinner-border text-secondary" role="status" style="width:2.4rem;height:2.4rem">
+        <span class="visually-hidden">Loading…</span>
       </div>
     </div>
   </div>
-  <script>
-    document.querySelector('form').addEventListener('submit', function(){
-        document.getElementById('loading-screen').style.display = "flex";
-    });
-  </script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.querySelector('.write-container form');
+  const overlay = document.getElementById('loading-screen');
+  const submitBtn = form?.querySelector('button[type="submit"]');
+
+  if (!form || !overlay) return;
+
+  // Always start hidden (in case of bfcache restore)
+  overlay.style.display = 'none';
+
+  form.addEventListener('submit', (e) => {
+    // If invalid, STOP and show native validation UI
+    if (!form.checkValidity()) {
+      e.preventDefault();
+      form.reportValidity();
+      return;
+    }
+    // Valid -> show overlay and prevent double submit
+    overlay.style.display = 'flex';
+    if (submitBtn) submitBtn.disabled = true;
+  });
+
+  // If the page is restored from bfcache (e.g., back button), hide overlay
+  window.addEventListener('pageshow', () => {
+    overlay.style.display = 'none';
+    if (submitBtn) submitBtn.disabled = false;
+  });
+
+  // Safety net: when tab becomes visible again, ensure overlay is hidden
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      overlay.style.display = 'none';
+      if (submitBtn) submitBtn.disabled = false;
+    }
+  });
+});
+</script>
 
 {% endblock %}

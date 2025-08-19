@@ -5,137 +5,197 @@
 <head>
   <meta charset="UTF-8">
   <title>WeWrite - User Posts</title>
+
+  <!-- Isotope -->
   <script src="https://unpkg.com/isotope-layout@3/dist/isotope.pkgd.min.js"></script>
+
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', sans-serif;
       margin: 0;
       padding: 20px;
-      background-color: #f8f9fa;
+      background-color: #f4f5f7;
+      height: 100vh;
     }
-.dropdown-menu {
-  position: absolute !important;
-  top: 100%; /* right below the button */
-  left: auto;
-  right: 0;
-  transform: none !important; /* prevent Bootstrap from using popper placement */
-  z-index: 1050;
-}
 
+    /* ===== Controls bar stays above the grid/items ===== */
     .top-bar {
+      isolation: isolate;        /* new: keep children on a higher plane */
+      position: relative;        /* stacking context root */
+      z-index: 3000;             /* above grid/items */
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin: 70px 0 50px;
+      margin: 90px 0 40px;
       flex-wrap: wrap;
-      z-index: 10000;
-  overflow: visible !important;
+    }
+    .top-bar .dropdown { position: relative; z-index: 3001; }
+    .dropdown-menu {
+      position: absolute !important;
+      top: 100%;
+      left: auto;
+      right: 0;
+      transform: none !important;
+      z-index: 10000;            /* ensure on top of transformed items */
+    }
+
+    /* ===== Masonry grid (Isotope) ===== */
+    #story-grid.grid {
+      position: relative;
+      display: block;
+      z-index: 0;                /* explicitly below .top-bar */
+      overflow: visible;
+      min-height: 40px;          /* non-zero so it never "steals" clicks */
+    }
+
+    /* 1 col on mobile */
+    .grid-sizer, .grid-item { width: 100%; }
+
+    /* 3 cols from md (≥768px); 2 gutters of 24px = 48px */
+    @media (min-width: 768px){
+      .grid-sizer,
+      .grid-item { width: calc((100% - 48px) / 3); }
+    }
+
+    /* vertical spacing between rows */
+    .grid-item {
+      margin-bottom: 24px;
+      z-index: 0;                /* keep items at base */
     }
 
     .post-card {
-      background: white;
-      border-radius: 10px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      padding: 20px;
       position: relative;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+      padding: 20px;
       display: flex;
       flex-direction: column;
-      height: 100%;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      height: 190px;
+      overflow: visible; /* ensure tags can overflow if needed */
     }
 
-
-    .post-header {
-      margin-bottom: 10px;
-    }
-
-    .post-title-container {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .post-title {
-      font-weight: bold;
-      font-size: 18px;
-      color: #4b4b4b;
-      margin-bottom: 2px;
-      word-wrap: break-word;
-    }
-
-    .post-date {
-      font-size: 13px;
-      color: #999;
-    }
-
-    .post-content {
-      font-size: 14px;
-      color: #555;
-      margin-bottom: 12px;
-      word-wrap: break-word;
-      flex-grow: 1;
-    }
-
-    .category {
-      font-size: 13px;
-      font-weight: 600;
-      padding: 4px 10px;
-      border-radius: 5px;
-      display: inline-block;
-      background-color: #e9ecef;
-      color: #333;
-      margin-top: auto;
+    .post-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
     }
 
     .genre {
       position: absolute;
-      top: 15px;
-      right: 15px;
-      background-color: #fff;
-      font-size: 11px;
-      font-weight: bold;
+      top: 16px;
+      left: 16px;
+      font-size: 12px;
+      font-weight: 600;
       padding: 4px 10px;
-      border-radius: 5px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
-      z-index: 1;
-      color: #666;
-      text-transform: capitalize;
+      border-radius: 999px;
+      background-color: #e0e0e0;
+      color: #333;
+      display: inline-block;
+      white-space: nowrap;
+      line-height: 1;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+      z-index: 2;
+      width: fit-content;
+      max-width: 100%;
     }
 
-    .science-fiction { color: #4caf50; }
-    .fantasy { color: #673ab7; }
-    .fiction { color: #ff9800; }
+    .genre.fiction { color: #ef6c00; background-color: rgba(255, 224, 178, 0.5); }
+    .genre.science-fiction { color: #388e3c; background-color: rgba(200, 230, 201, 0.5); }
+    .genre.historical-fiction { color: #6d4c41; background-color: rgba(215, 204, 200, 0.5); }
+    .genre.mystery { color: #1e88e5; background-color: rgba(187, 222, 251, 0.5); }
+    .genre.fantasy { color: #512da8; background-color: rgba(225, 210, 255, 0.5); }
+    .genre.romance { color: #d81b60; background-color: rgba(255, 205, 210, 0.5); }
+    .genre.adventure { color: #00796b; background-color: rgba(178, 223, 219, 0.5); }
+    .genre.action { color: #c62828; background-color: rgba(255, 205, 210, 0.4); }
+
+    .post-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #2c2c2c;
+      margin-bottom: 6px;
+      margin-top: 40px;
+      word-wrap: break-word;
+    }
+
+    .post-date { font-size: 13px; color: #888; margin-bottom: 12px; }
+
+    .post-content {
+      font-size: 14px;
+      color: #444;
+      line-height: 1.5;
+      word-wrap: break-word;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex-grow: 1;
+    }
+
+    .post-footer {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: auto;
+      padding-top: 10px;
+    }
+
+    .category {
+      font-size: 12px;
+      font-weight: 500;
+      padding: 4px 10px;
+      border-radius: 16px;
+      background-color: #e3e7ed;
+      color: #333;
+    }
 
     .floating-write-btn {
       position: fixed;
       bottom: 25px;
       right: 25px;
+      width: 56px;
+      height: 56px;
       background: #6c63ff;
       color: white;
-      padding: 14px;
       border-radius: 50%;
       font-size: 20px;
       box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       transition: background 0.3s ease;
-      z-index: 1000;
+      z-index: 2500;             /* still above grid */
+      text-decoration: none;
     }
 
-    .floating-write-btn:hover {
-      background: #4a43d6;
-      color: #fff;
-      text-decoration: none;
+    .floating-write-btn:hover { background: #4a43d6; color: #fff; text-decoration: none; }
+
+    .search-container {
+      border: 1.5px solid #ccc;
+      border-radius: 10px;
+      height: 42px;
+      max-width: 600px;
+      flex-grow: 1;
+    }
+
+    .search-container input {
+      font-size: 0.95rem;
+      line-height: 1.2rem;
+      height: 100%;
     }
   </style>
 </head>
 <body>
 
-<div class="top-bar d-flex justify-content-between align-items-center flex-wrap">
-  <div class="search-container d-flex align-items-center px-3 py-1 mb-3"
-       style="border: 1.5px solid #ccc; border-radius: 10px; height: 42px; max-width: 600px; flex-grow: 1;">
+<div class="top-bar">
+  <div class="search-container d-flex align-items-center px-3 py-1 mb-3">
     <i class="bi bi-search me-2" style="font-size: 1rem; color: #666;"></i>
     <input type="text" id="boardSearchInput" class="form-control border-0 shadow-none bg-transparent p-0 ps-1"
-           placeholder="Search story titles..." style="font-size: 0.95rem; line-height: 1.2rem; height: 100%;">
+           placeholder="Search story titles...">
     <div class="dropdown">
-      <button class="btn border-0 bg-transparent p-0 ms-2" type="button" id="boardGenreDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+      <button class="btn border-0 bg-transparent p-0 ms-2"
+              type="button"
+              id="boardGenreDropdown"
+              data-bs-toggle="dropdown"
+              data-bs-display="static"
+              aria-expanded="false">
         <i class="bi bi-sliders" style="font-size: 1rem; color: #666;"></i>
       </button>
       <ul class="dropdown-menu dropdown-menu-end" id="boardGenreDropdownMenu">
@@ -146,24 +206,22 @@
       </ul>
     </div>
   </div>
-
-
 </div>
 
-<div id="story-grid" class="row g-4">
+<!-- ===== Masonry grid (no Bootstrap row/cols) ===== -->
+<div id="story-grid" class="grid">
+  <div class="grid-sizer"></div>
   {% for story, exposition, pk, genre, title, last_part in story_tuple_list %}
-  <div class="col-12 col-md-6 col-lg-4 grid-item genre-{{ genre.name|lower|cut:' ' }} d-flex">
+  <div class="grid-item genre-{{ genre.name|lower|cut:' ' }}">
     <a href="{% url 'to-collaborate' pk %}" class="w-100 text-decoration-none">
       <div class="post-card">
         <span class="genre {{ genre.name|slugify }}">{{ genre.name | title }}</span>
-        <div class="post-header">
-          <div class="post-title-container">
-            <span class="post-title">{{ title | title }}</span>
-            <span class="post-date">{{ story.started_date }}</span>
-          </div>
+        <div class="post-title">{{ title|striptags|cut:" "|title }}</div>
+        <div class="post-date">{{ story.started_date }}</div>
+        <div class="post-content mt-2">{{ exposition|truncatechars:100 }}</div>
+        <div class="post-footer">
+          <span class="category">{{ last_part | title }}</span>
         </div>
-        <div class="post-content">{{ exposition | title }}</div>
-        <span class="category" style="margin-top:58px;">{{ last_part | title }}</span>
       </div>
     </a>
   </div>
@@ -178,34 +236,53 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-  const iso = new Isotope("#story-grid", {
+  const gridEl = document.querySelector("#story-grid");
+
+  const iso = new Isotope(gridEl, {
     itemSelector: ".grid-item",
-    layoutMode: "masonry"
+    percentPosition: true,
+    masonry: {
+      columnWidth: ".grid-sizer",
+      gutter: 24
+    }
   });
 
+  // Genre dropdown
   document.querySelectorAll('#boardGenreDropdownMenu a').forEach(item => {
     item.addEventListener('click', function (e) {
       e.preventDefault();
       document.querySelector('#boardGenreDropdownMenu .active')?.classList.remove('active');
       this.classList.add('active');
-      document.getElementById('boardGenreDropdown').innerHTML = `<i class="bi bi-sliders" style="font-size: 1rem; color: #666;"></i>`;
+      // keep icon only (no changing text)
+      document.getElementById('boardGenreDropdown').innerHTML =
+        `<i class="bi bi-sliders" style="font-size: 1rem; color: #666;"></i>`;
+
       const filterValue = this.getAttribute("data-filter");
       iso.arrange({ filter: filterValue });
-      document.getElementById("boardSearchInput").dispatchEvent(new Event("input"));
+      document.getElementById("boardSearchInput").dispatchEvent(new Event("input")); // reapply search
+      iso.layout();
     });
   });
 
+  // Search with current genre filter
   document.getElementById("boardSearchInput").addEventListener("input", function () {
     const searchTerm = this.value.toLowerCase();
-    const genreFilter = document.querySelector("#boardGenreDropdownMenu .active").getAttribute("data-filter");
+    const active = document.querySelector("#boardGenreDropdownMenu .active");
+    const genreFilter = active ? active.getAttribute("data-filter") : "*";
+    const exactClass = genreFilter.startsWith('.') ? genreFilter.substring(1) : genreFilter; // ".genre-fiction" -> "genre-fiction"
+
     iso.arrange({
       filter: function (itemElem) {
-        const title = itemElem.querySelector(".post-title")?.innerText.toLowerCase();
-        const genreMatch = genreFilter === "*" || itemElem.classList.contains(genreFilter.slice(1));
+        const title = (itemElem.querySelector(".post-title")?.innerText || '').toLowerCase();
+        const genreMatch = genreFilter === "*" || itemElem.classList.contains(exactClass);
         return genreMatch && title.includes(searchTerm);
       }
     });
+    iso.layout();
   });
+
+  // Relayout on resize
+  window.addEventListener('resize', () => iso.layout());
 });
 </script>
 
